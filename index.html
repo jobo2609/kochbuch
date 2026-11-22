@@ -593,13 +593,15 @@ function updShop(){
 /* ---------- Dialoge ---------- */
 const g1 = x => (Math.round(x * 10) / 10).toString().replace(".", ",");
 function kcalBox(r){
-  const c = kcalOf(r), h = c.per100, ok = c.total > 0;
-  const cell = (v, unit, lab, cls = "") => `<div class="${cls}"><b>${ok ? v : "–"}<i>${unit}</i></b><span>${lab}</span></div>`;
-  return `<div class="sh"><span>Nährwerte pro 100 g</span>${c.own ? `<span style="color:var(--acc);text-transform:none">eigene Angabe</span>` : ""}</div>
-    <div class="list"><div class="kgrid">${cell(Math.round(h.k), "", "kcal", "k")}${cell(g1(h.c), " g", "Kohlenhydrate")}${cell(g1(h.p), " g", "Eiweiß")}${cell(g1(h.f), " g", "Fett")}</div>
-    ${ok && c.per ? `<div class="li"><span class="t">Portion</span><span class="val" style="font-size:15px">${r10(c.per.k)} kcal · ${Math.round(c.per.c)} KH · ${Math.round(c.per.p)} EW · ${Math.round(c.per.f)} F</span></div>` : ""}
+  const c = kcalOf(r), h = c.per100, pp = c.per, ok = c.total > 0;
+  const grid = (v, kc) => `<div class="kgrid">${[["k", "", "kcal"], ["c", " g", "Kohlenhydrate"], ["p", " g", "Eiweiß"], ["f", " g", "Fett"]].map(([x, u, lab]) =>
+    `<div class="${x === "k" ? "k" : ""}"><b>${ok && v ? (x === "k" ? kc(v.k) : g1(v[x])) : "–"}<i>${u}</i></b><span>${lab}</span></div>`).join("")}</div>`;
+  return `<div class="sh"><span>Nährwerte pro Portion</span>${c.own ? `<span style="color:var(--acc);text-transform:none">eigene Angabe</span>` : ""}</div>
+    <div class="list">${grid(pp && {k: pp.k, c: Math.round(pp.c), p: Math.round(pp.p), f: Math.round(pp.f)}, r10)}</div>
+    <div class="sh"><span>Nährwerte pro 100 g</span></div>
+    <div class="list">${grid(h, Math.round)}
     <div class="li tap" id="kc"><span class="t act">${c.miss.length ? "Fehlende Werte eintragen" : "Werte ansehen oder ändern"}</span>${ic("chev", "chev")}</div></div>
-    <p class="sf">${c.miss.length ? `Noch ohne Wert: ${c.miss.map(esc).join(", ")}` : c.own ? "Von dir für dieses Rezept eingetragen." : "Richtwerte, berechnet aus den Zutaten (roh)."}</p>`;
+    <p class="sf">${c.miss.length ? `Noch ohne Wert: ${c.miss.map(esc).join(", ")}` : c.own ? "Von dir für dieses Rezept eingetragen." : "Richtwerte, berechnet aus den Zutaten (roh). Eine Portion = Rezeptmenge geteilt durch " + (r.portions || 1) + "."}</p>`;
 }
 /* Kopfzeile eines Blatts wie in iOS: links abbrechen, Mitte Titel, rechts bestätigen */
 const sheetHd = (left, title, right) => `<div class="sheethd"><button id="hl">${left}</button><b>${title}</b>${right ? `<button id="hr">${right}</button>` : "<span></span>"}</div>`;
