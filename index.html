@@ -295,7 +295,7 @@ for (const r of SEED) {
 }
 save();
 let tab = "recipes", filterTag = "", search = "";
-const APP_VERSION = "14";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
+const APP_VERSION = "15";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
 
 /* ---------- Hilfsfunktionen ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -714,6 +714,31 @@ function detail(id){
   $("#kc").onclick = () => nutriDlg(r);
   $("#del").onclick = () => { if (confirm(`„${r.name}“ löschen?`)) { S.recipes = S.recipes.filter(x => x.id !== id); S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id); save(); closeDlg(); render() } };
 }
+/* ---------- Kategorien automatisch erkennen ----------
+   Aus Name, Zutaten und Zubereitung; nutzt die Schreibweise vorhandener Kategorien. */
+const MEAT = /hack|hähnchen|huhn|chicken|pute|rind|schwein|kalb|lamm|schinken|speck|bacon|wurst|lyoner|salami|chorizo|fleisch|lachs|thunfisch|fisch|garnele|shrimp|scampi|krabbe|sardelle/;
+const CAT_RULES = [
+  ["Suppe", (n) => /suppe|eintopf|chili con|brühe$/.test(n)],
+  ["Salat", (n) => /salat/.test(n)],
+  ["Bowl", (n) => /bowl/.test(n)],
+  ["Auflauf", (n) => /auflauf|gratin|lasagne|\bpie\b|überbacken|moussaka/.test(n)],
+  ["Sauce", (n) => /sauce|soße|sosse|\bdip\b|pesto/.test(n)],
+  ["Pasta", (n, z) => /spaghetti|nudel|pasta|penne|lasagne|tagliatelle|makkaroni|fusilli|gnocchi|tortellini|ravioli/.test(n + " " + z.replace(/suppennudel\w*/g, ""))],
+  ["Reis", (n, z) => /(?<!p)reis|risotto/.test(n + " " + z)],
+  ["Hack", (n, z) => /hack/.test(n + " " + z)],
+  ["Hähnchen", (n, z) => /hähnchen|huhn|chicken|pute/.test(n + " " + z)],
+  ["Fisch", (n, z) => /lachs|thunfisch|fisch|garnele|shrimp|scampi/.test(n + " " + z)],
+  ["Airfryer", (n, z, st) => /airfryer|heißluftfritteuse/.test(n + " " + st)],
+  ["Frühstück", (n) => /müsli|porridge|overnight|pancake|pfannkuchen|omelett|rührei|frühstück/.test(n)],
+  ["Dessert", (n) => /kuchen|dessert|pudding|mousse|tiramisu|crumble|muffin|brownie|waffel/.test(n)],
+  ["vegetarisch", (n, z) => z.trim() && !MEAT.test(n + " " + z)],
+  ["schnell", (n, z, st) => /schnell|express|blitz|mikrowelle/.test(n)]
+];
+function autoTags(name, ingText, steps){
+  const n = name.toLowerCase(), z = ingText.toLowerCase(), st = steps.toLowerCase();
+  const known = new Map(S.recipes.flatMap(r => r.tags || []).map(t => [t.toLowerCase(), t]));
+  return CAT_RULES.filter(([, test]) => test(n, z, st)).map(([t]) => known.get(t.toLowerCase()) || t);
+}
 function editor(r){
   const e = r || {name:"", portions:2, tags:[], ingredients:[], steps:"", img:""};
   $("#dlg").innerHTML = `${sheetHd("Abbrechen", r ? "Bearbeiten" : "Neues Rezept", "Sichern")}<div class="pad">
@@ -722,6 +747,8 @@ function editor(r){
       <div class="li"><span class="t">Portionen</span><input class="fi num" id="ep" type="number" inputmode="numeric" min="1" value="${e.portions}"></div>
       <div class="li"><input class="fi" id="et" placeholder="Kategorien, z. B. Pasta, schnell" value="${esc((e.tags||[]).join(", "))}"></div>
     </div>
+    <div class="chips" id="sugg" style="margin:10px -16px 0"></div>
+    <p class="sf" id="suggh"></p>
     <div class="sh"><span>Zutaten</span></div>
     <div class="list"><div class="li"><textarea class="fi" id="ei" placeholder="200 g Nudeln&#10;2 Zwiebel&#10;1 EL Öl">${esc(e.ingredients.map(ingText).join("\n"))}</textarea></div></div>
     <p class="sf">Eine Zutat pro Zeile, z.&nbsp;B. „200 g Nudeln“, „2 Zwiebel“, „1 EL Öl“.</p>
@@ -730,6 +757,21 @@ function editor(r){
     <div class="list" style="margin-top:22px"><label class="li tap"><input type="file" id="eimg" accept="image/*" hidden><span class="t act">${e.img ? "Foto ändern" : "Foto hinzufügen"}</span><span class="val" id="imgst">${e.img ? "vorhanden" : "optional"}</span></label></div></div>`;
   openDlg();
   $("#hl").onclick = closeDlg;
+  /* Kategorien: bei neuen Rezepten automatisch ausfüllen, solange du das Feld nicht selbst änderst;
+     sonst als antippbare Vorschläge anzeigen */
+  let touched = !!r;
+  const cur = () => $("#et").value.split(",").map(s => s.trim()).filter(Boolean);
+  const upd = () => {
+    const sug = autoTags($("#en").value, $("#ei").value, $("#es").value);
+    if (!touched) $("#et").value = sug.join(", ");
+    const have = cur().map(t => t.toLowerCase()), extra = sug.filter(t => !have.includes(t.toLowerCase()));
+    $("#sugg").innerHTML = extra.map(t => `<button class="chip" data-sug="${esc(t)}">+ ${esc(t)}</button>`).join("");
+    $("#suggh").textContent = !touched && sug.length ? "Kategorien werden automatisch erkannt. Du kannst sie im Feld ändern." : extra.length ? "Vorschläge: zum Hinzufügen antippen." : "";
+    document.querySelectorAll("[data-sug]").forEach(b => b.onclick = () => { touched = true; $("#et").value = [...cur(), b.dataset.sug].join(", "); upd() });
+  };
+  $("#et").oninput = () => { touched = true; upd() };
+  ["#en", "#ei", "#es"].forEach(q => $(q).addEventListener("input", upd));
+  upd();
   let img = e.img || "";
   $("#eimg").onchange = ev => { const f = ev.target.files[0]; if (!f) return;
     const im = new Image(), u = URL.createObjectURL(f);
@@ -737,7 +779,7 @@ function editor(r){
   $("#hr").onclick = () => {
     const name = $("#en").value.trim(); if (!name) return alert("Bitte einen Namen eingeben.");
     const rec = {id: e.id || uid(), name, portions: Math.max(1, +$("#ep").value || 1),
-      tags: $("#et").value.split(",").map(s => s.trim()).filter(Boolean),
+      tags: (t => t.length ? t : autoTags(name, $("#ei").value, $("#es").value))($("#et").value.split(",").map(s => s.trim()).filter(Boolean)),
       ingredients: $("#ei").value.split("\n").map(parseLine).filter(Boolean), steps: $("#es").value.trim(), img, edited: true, ...(e.own ? {own: e.own} : {})};
     const i = S.recipes.findIndex(x => x.id === rec.id); i >= 0 ? S.recipes[i] = rec : S.recipes.push(rec);
     save(); closeDlg(); render();
