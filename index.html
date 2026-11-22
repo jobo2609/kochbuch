@@ -428,7 +428,7 @@ function vShop(){
     <div class="row">
       <div class="sec sp"><h2>Einkaufsliste</h2><span class="mute">${S.plan.length} Gerichte${items.length ? ` · ${done} von ${items.length} erledigt` : ""}</span></div>
       <div class="step inline-step noprint"><span>Personen</span>${stepper("people")}</div>
-      ${items.length ? `<button class="g noprint" id="reset">Haken entfernen</button>${navigator.share ? `<button class="g noprint" id="share">Teilen</button>` : ""}<button class="g noprint" id="copy">Kopieren</button><button class="g noprint desk" onclick="print()">Drucken</button>` : ""}
+      ${items.length ? `<button class="g noprint" id="reset">Zurücksetzen</button>${navigator.share ? `<button class="g noprint" id="share">Teilen</button>` : ""}<button class="g noprint" id="copy">Kopieren</button><button class="g noprint desk" onclick="print()">Drucken</button>` : ""}
     </div>
     ${items.length ? `<div class="bar ${done === items.length ? "full" : ""}"><i style="width:${done / items.length * 100}%"></i></div>
     <div class="aisles shop">${groups.map(g => `<div class="aisle"><h3>${g.title}<span>${g.list.filter(i => !S.checked[i.key]).length} offen</span></h3><ul class="clean">${g.list.map(i => `
