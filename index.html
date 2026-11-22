@@ -57,15 +57,22 @@ nav .plus:hover{background:var(--acc);filter:brightness(1.07)}
 .panel > p{margin:10px 0 14px}
 .inline-step{margin-left:auto}
 .kc{background:var(--soft);border-radius:14px;padding:12px 14px;margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
-.kcn{display:flex;gap:22px;flex:1}
-.kcn div{line-height:1.15}.kcn b{display:block;font-size:22px;color:var(--acc)}.kcn span{font-size:12px;color:var(--mute)}
+.kch{flex-basis:100%;display:flex;justify-content:space-between;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.kch em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--acc)}
+.kcn{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-basis:100%}
+.kcn div{line-height:1.15;background:var(--card);border-radius:10px;padding:8px 6px;text-align:center}
+.kcn b{display:block;font-size:19px;color:var(--acc)}.kcn b i{font-style:normal;font-size:12px;font-weight:600}.kcn span{font-size:11px;color:var(--mute)}
+.kcp{flex-basis:100%;font-size:13px}
 .kc small{flex-basis:100%;order:3;color:var(--mute);font-size:12px}
 .kc button{padding:6px 12px;font-size:13px}
 .nut li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 0;border-top:1px solid var(--line)}
 .nut .nm{flex:1 1 100%;min-width:0}
 dialog h2{padding-right:40px}.nut .nm small{display:block;color:var(--mute);font-size:12px}
-.nut label{font-size:12px;color:var(--mute);display:flex;flex-direction:column;gap:2px}
-.nut input{width:92px;padding:7px 9px}
+.nut label,.nut4 label{font-size:12px;color:var(--mute);display:flex;flex-direction:column;gap:2px}
+.nut input,.nut4 input{width:72px;padding:7px 8px}
+.ownbox{background:var(--soft);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.ownbox .mute{font-size:12.5px}
+.nut4{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 main{padding-top:20px;padding-bottom:60px}
 input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
 input:focus,textarea:focus{outline:2px solid var(--acc2);border-color:var(--acc)}
@@ -293,12 +300,13 @@ function parseLine(line){
   const m = line.match(/^([\d.,\/]+)\s*([A-Za-zäöüÄÖÜ.]+)?\s+(.+)$/) || line.match(/^([\d.,\/]+)\s*()(.+)$/);
   if (!m) return {name: line, qty: 0, unit: ""};
   let [, q, u, name] = m; u = u || "";
-  const known = /^(g|kg|ml|l|cl|el|tl|stk|stk\.|dose|dosen|pck|pck\.|packung|bund|prise|zehe|zehen|scheibe|scheiben|becher|glas)$/i;
+  const known = /^(g|kg|ml|l|cl|el|tl|stk|stk\.|dose|dosen|pck|pck\.|packung|packungen|bund|prise|zehe|zehen|scheibe|scheiben|becher|glas|gläser|ring|flasche|flaschen|handvoll|stange|stangen|beutel|kopf|köpfe)$/i;
   if (u && !known.test(u)) { name = u + " " + name; u = "" }
   const l = u.toLowerCase();
   if (l === "el" || l === "tl") u = l.toUpperCase();
   else if (/^stk/.test(l)) u = "Stk";
   else if (UNITS[l]) u = l;
+  else u = {scheiben: "Scheibe", zehen: "Zehe", dosen: "Dose", flaschen: "Flasche", stangen: "Stange", packungen: "Packung", "gläser": "Glas", "köpfe": "Kopf", "pck.": "Pck"}[l] || cap(l);
   return {name: name.trim(), qty: num(q), unit: u};
 }
 const ingText = i => (i.qty ? fmt(i.qty, i.unit) + " " : "") + i.name;
@@ -316,36 +324,36 @@ function nice(qty, unit, shop){
   return fmt(q, unit);
 }
 
-/* ---------- Kalorien ----------
-   Richtwerte: kcal pro 100 g (roh) und Gewicht in g für Stück-Angaben.
+/* ---------- Nährwerte ----------
+   Richtwerte je 100 g (roh): [Muster, kcal, Gewicht in g für Stück-Angaben, Eiweiß, Kohlenhydrate, Fett].
    Erste passende Zeile gewinnt, deshalb Spezielles vor Allgemeinem. */
 const NUTRI = [
-  [/süßkartoffel/, 86, {Stk: 300}], [/kartoffel/, 72, {Stk: 100}],
-  [/röstzwiebel/, 600, {}], [/frühlingszwiebel|lauchzwiebel/, 32, {Stk: 20, Stange: 20}], [/zwiebel/, 40, {Stk: 100}],
-  [/basilikum|schnittlauch|petersilie|kräuter$/, 30, {Bund: 20}], [/knoblauch/, 140, {Stk: 4, Zehe: 4}], [/lauch|porree/, 27, {Stk: 250, Stange: 250}],
-  [/karotte|möhre/, 36, {Stk: 80}], [/zucchini/, 20, {Stk: 250}], [/paprika/, 30, {Stk: 150}],
-  [/tomatenmark/, 85, {}], [/passierte tomaten|tomaten.*dose|dosentomaten/, 30, {Dose: 400}], [/tomate/, 18, {Stk: 100}],
-  [/brokkoli/, 35, {Stk: 400}], [/spinat/, 25, {Packung: 450}], [/erbsen/, 80, {Handvoll: 40}], [/bohnen/, 32, {}],
-  [/salat/, 15, {Stk: 300, Kopf: 300}], [/gurke/, 20, {Stk: 50, Glas: 360}], [/granatapfel/, 83, {}],
-  [/walnüss|nüsse|mandel/, 670, {Handvoll: 30}],
-  [/suppengrün/, 30, {Bund: 400}],
-  [/mikrowellenreis/, 160, {Stk: 250, Beutel: 250}], [/reis/, 350, {}],
-  [/nudel|spaghetti|penne|pasta|makkaroni/, 355, {}], [/linsen/, 340, {}],
-  [/brot|toast/, 240, {Scheibe: 45, Stk: 45}],
-  [/butter/, 740, {EL: 15, TL: 5}], [/öl\b|öl$|öl /, 880, {EL: 10, TL: 4}],
-  [/crème fraîche light|creme fraiche light/, 160, {}], [/crème fraîche|creme fraiche/, 290, {}],
-  [/saure sahne/, 160, {Becher: 200}], [/frischkäse|schmand/, 250, {EL: 20, Becher: 200}],
-  [/light sahne|cremefine/, 160, {Flasche: 250, Becher: 250}], [/kochsahne/, 165, {}], [/sahne/, 300, {Becher: 200}],
-  [/milch/, 64, {}], [/griechischer joghurt/, 120, {}], [/skyr|quark/, 65, {}], [/joghurt/, 65, {}],
-  [/schmelzkäse/, 250, {}], [/light-käse|lightkäse/, 270, {Scheibe: 20}], [/parmesan/, 390, {}], [/cheddar/, 400, {}],
-  [/feta/, 270, {}], [/mozzarella/, 250, {Stk: 125}], [/käse/, 350, {Scheibe: 25}],
-  [/^ei\b|^eier\b/, 140, {Stk: 60}],
-  [/hähnchen|chicken|pute/, 115, {}], [/rinderhack/, 250, {}], [/hack/, 260, {}],
-  [/rindfleisch/, 190, {}], [/schinken/, 110, {}], [/speck/, 450, {}], [/lyoner|wurst/, 300, {Ring: 500}],
-  [/miracel whip balance|miracle whip balance/, 200, {Glas: 500}], [/miracel whip|miracle whip|mayo/, 360, {Glas: 500}],
-  [/ketchup/, 110, {}], [/senf/, 100, {}], [/soja/, 60, {}], [/worcester/, 80, {}], [/sriracha/, 95, {}],
-  [/balsamico/, 90, {}], [/essig/, 20, {}], [/honig/, 305, {EL: 20}], [/zucker|sirup/, 390, {}],
-  [/brühwürfel/, 200, {Stk: 10}], [/brühe/, 5, {}], [/rotwein|weißwein|wein/, 70, {}]
+  [/süßkartoffel/, 86, {Stk: 300}, 1.6, 20, 0.1], [/kartoffel/, 72, {Stk: 100}, 2, 15.6, 0.1],
+  [/röstzwiebel/, 600, {}, 6, 40, 44], [/frühlingszwiebel|lauchzwiebel/, 32, {Stk: 20, Stange: 20}, 1.8, 5, 0.2], [/zwiebel/, 40, {Stk: 100}, 1.2, 8, 0.1],
+  [/basilikum|schnittlauch|petersilie|kräuter$/, 30, {Bund: 20}, 3, 2, 0.6], [/knoblauch/, 140, {Stk: 4, Zehe: 4}, 6, 28, 0.5], [/lauch|porree/, 27, {Stk: 250, Stange: 250}, 2.2, 3.3, 0.3],
+  [/karotte|möhre/, 36, {Stk: 80}, 0.9, 7, 0.2], [/zucchini/, 20, {Stk: 250}, 1.6, 2.2, 0.3], [/paprika/, 30, {Stk: 150}, 1, 5, 0.3],
+  [/tomatenmark/, 85, {}, 4.5, 13, 0.5], [/passierte tomaten|tomaten.*dose|dosentomaten/, 30, {Dose: 400}, 1.4, 5, 0.2], [/tomate/, 18, {Stk: 100}, 0.9, 2.6, 0.2],
+  [/brokkoli/, 35, {Stk: 400}, 3.5, 2.7, 0.4], [/spinat/, 25, {Packung: 450}, 2.5, 0.6, 0.4], [/erbsen/, 80, {Handvoll: 40}, 6, 11, 0.5], [/bohnen/, 32, {}, 2, 5, 0.2],
+  [/salat/, 15, {Stk: 300, Kopf: 300}, 1.3, 1.5, 0.2], [/gurke/, 20, {Stk: 50, Glas: 360}, 0.5, 3.5, 0.1], [/granatapfel/, 83, {}, 1.7, 17, 1.2],
+  [/walnüss|nüsse|mandel/, 670, {Handvoll: 30}, 15, 11, 63],
+  [/suppengrün/, 30, {Bund: 400}, 1.5, 5, 0.3],
+  [/mikrowellenreis/, 160, {Stk: 250, Beutel: 250}, 3, 33, 1.5], [/reis/, 350, {}, 7, 78, 0.6],
+  [/nudel|spaghetti|penne|pasta|makkaroni/, 355, {}, 12, 71, 1.5], [/linsen/, 340, {}, 24, 50, 1.5],
+  [/brot|toast/, 240, {Scheibe: 45, Stk: 45}, 8, 45, 2],
+  [/butter/, 740, {EL: 15, TL: 5}, 0.7, 0.6, 82], [/öl\b|öl$|öl /, 880, {EL: 10, TL: 4}, 0, 0, 99],
+  [/crème fraîche light|creme fraiche light/, 160, {}, 3, 4, 15], [/crème fraîche|creme fraiche/, 290, {}, 2.4, 2.6, 30],
+  [/saure sahne/, 160, {Becher: 200}, 3, 3.5, 15], [/frischkäse|schmand/, 250, {EL: 20, Becher: 200}, 6, 3, 24],
+  [/light sahne|cremefine/, 160, {Flasche: 250, Becher: 250}, 3, 4, 15], [/kochsahne/, 165, {}, 2.8, 4, 15], [/sahne/, 300, {Becher: 200}, 2.4, 3, 30],
+  [/milch/, 64, {}, 3.4, 4.8, 3.5], [/griechischer joghurt/, 120, {}, 4, 4, 10], [/skyr|quark/, 65, {}, 11, 4, 0.2], [/joghurt/, 65, {}, 3.5, 4.5, 3.5],
+  [/schmelzkäse/, 250, {}, 10, 5, 21], [/light-käse|lightkäse/, 270, {Scheibe: 20}, 30, 0.1, 16], [/parmesan/, 390, {}, 32, 0, 29], [/cheddar/, 400, {}, 25, 1, 33],
+  [/feta/, 270, {}, 17, 0.5, 22], [/mozzarella/, 250, {Stk: 125}, 18, 1, 19], [/käse/, 350, {Scheibe: 25}, 26, 0.1, 27],
+  [/^ei\b|^eier\b/, 140, {Stk: 60}, 12.5, 0.7, 9.5],
+  [/hähnchen|chicken|pute/, 115, {}, 23, 0, 2], [/rinderhack/, 250, {}, 18, 0, 20], [/hack/, 260, {}, 18, 0, 21],
+  [/rindfleisch/, 190, {}, 20, 0, 12], [/schinken/, 110, {}, 20, 1, 3], [/speck/, 450, {}, 15, 0, 43], [/lyoner|wurst/, 300, {Ring: 500}, 12, 1, 28],
+  [/miracel whip balance|miracle whip balance/, 200, {Glas: 500}, 0.5, 11, 17.5], [/miracel whip|miracle whip|mayo/, 360, {Glas: 500}, 1, 12, 34],
+  [/ketchup/, 110, {}, 1.2, 25, 0.2], [/senf/, 100, {}, 6, 5, 6], [/soja/, 60, {}, 8, 6, 0.1], [/worcester/, 80, {}, 0, 19, 0], [/sriracha/, 95, {}, 2, 19, 1],
+  [/balsamico/, 90, {}, 0.5, 17, 0], [/essig/, 20, {}, 0, 0.6, 0], [/honig/, 305, {EL: 20}, 0.4, 82, 0], [/zucker|sirup/, 390, {}, 0, 98, 0],
+  [/brühwürfel/, 200, {Stk: 10}, 8, 20, 12], [/brühe/, 5, {}, 0.3, 0.5, 0.2], [/rotwein|weißwein|wein/, 70, {}, 0.1, 2.6, 0]
 ];
 /* Gewicht allgemeiner Einheiten in g (Flüssiges: 1 ml ≈ 1 g) */
 const UNIT_G = {g: 1, kg: 1000, ml: 1, l: 1000, cl: 10, EL: 15, TL: 5, Prise: .5, Handvoll: 30, Bund: 30, Scheibe: 25, Becher: 200, Glas: 400, Flasche: 250, Packung: 400, Dose: 400, Ring: 500, Stange: 100, Zehe: 4, Pck: 400, "Pck.": 400};
@@ -354,7 +362,7 @@ const cap = u => u ? u[0].toUpperCase() + u.slice(1) : "";
 function nutriOf(name){
   const n = name.toLowerCase().trim(), own = (S.nutri || {})[n];
   const hit = NUTRI.find(([re]) => re.test(n));
-  return {k: own?.k ?? hit?.[1], g: {...(hit?.[2] || {}), ...(own?.g || {})}, own: !!own};
+  return {k: own?.k ?? hit?.[1], p: own?.p ?? hit?.[3], c: own?.c ?? hit?.[4], f: own?.f ?? hit?.[5], g: {...(hit?.[2] || {}), ...(own?.g || {})}, own: !!own};
 }
 /* Gramm einer Zutatenmenge, oder null wenn unbekannt */
 function gramsOf(i){
@@ -365,19 +373,30 @@ function gramsOf(i){
   if (/\bgroß/i.test(i.name) && /Stk|Stange/.test(u) && !/porree/i.test(i.name)) per *= 1.5;
   return i.qty * per;
 }
-/* kcal eines Rezepts: gesamt, pro Portion, pro 100 g und was fehlt */
+/* Nährwerte eines Rezepts: gesamt, pro Portion, pro 100 g und was fehlt.
+   Hat das Rezept eigene Werte (r.own, je 100 g), gelten diese. */
 function kcalOf(r){
-  let kcal = 0, grams = 0; const miss = [];
+  const t = {k: 0, p: 0, c: 0, f: 0}; let grams = 0; const miss = [];
   for (const i of r.ingredients) {
     if (!i.qty) continue;
     const nu = nutriOf(i.name), g = gramsOf(i);
     if (nu.k == null || g == null) { miss.push(i.name); continue }
-    kcal += g * nu.k / 100; grams += g;
+    for (const x of "kpcf") t[x] += g * (nu[x] || 0) / 100;
+    grams += g;
   }
-  return {total: kcal, portion: kcal / (r.portions || 1), per100: grams ? kcal / grams * 100 : 0, miss};
+  const n = r.portions || 1, o = r.own;
+  if (o && o.k != null) {
+    const pg = grams / n;   /* Portionsgewicht aus den Zutaten, falls bekannt */
+    const per100 = {k: o.k, p: o.p ?? 0, c: o.c ?? 0, f: o.f ?? 0};
+    const portion = pg ? Object.fromEntries(Object.entries(per100).map(([x, v]) => [x, v * pg / 100])) : null;
+    return {own: true, total: 1, per100, portion: portion ? portion.k : (o.portion || 0), per: portion, miss: []};
+  }
+  const per100 = grams ? Object.fromEntries(Object.entries(t).map(([x, v]) => [x, v / grams * 100])) : {k: 0, p: 0, c: 0, f: 0};
+  const per = Object.fromEntries(Object.entries(t).map(([x, v]) => [x, v / n]));
+  return {own: false, total: t.k, per100, portion: t.k / n, per, miss};
 }
 const r10 = x => Math.round(x / 10) * 10;
-const kcalTxt = r => { const c = kcalOf(r); return c.total ? `🔥 ${r10(c.portion)} kcal` : "" };
+const kcalTxt = r => { const c = kcalOf(r); return c.portion > 0 ? `🔥 ${r10(c.portion)} kcal` : "" };
 
 /* ---------- Plan-Logik ---------- */
 function randomize(){
@@ -533,37 +552,52 @@ function vShop(){
 }
 
 /* ---------- Dialoge ---------- */
+const g1 = x => (Math.round(x * 10) / 10).toString().replace(".", ",");
 function kcalBox(r){
-  const c = kcalOf(r);
-  return `<div class="kc"><div class="kcn"><div><b>${c.total ? r10(c.portion) : "–"}</b><span>kcal pro Portion</span></div><div><b>${c.total ? Math.round(c.per100) : "–"}</b><span>kcal pro 100 g</span></div></div>
-    ${c.miss.length ? `<small>Noch ohne Wert: ${c.miss.map(esc).join(", ")}</small>` : `<small>Richtwerte, berechnet aus den Zutaten (roh)</small>`}
-    <button class="g" id="kc">${c.miss.length ? "Fehlende Werte eintragen" : "Werte ansehen"}</button></div>`;
+  const c = kcalOf(r), h = c.per100, ok = c.total > 0;
+  const cell = (v, unit, lab) => `<div><b>${ok ? v : "–"}<i>${unit}</i></b><span>${lab}</span></div>`;
+  return `<div class="kc"><div class="kch"><span>Nährwerte pro 100 g</span>${c.own ? `<em>eigene Angabe</em>` : ""}</div>
+    <div class="kcn">${cell(Math.round(h.k), "", "kcal")}${cell(g1(h.c), " g", "Kohlenhydrate")}${cell(g1(h.p), " g", "Eiweiß")}${cell(g1(h.f), " g", "Fett")}</div>
+    ${ok && c.per ? `<div class="kcp">Pro Portion: <b>${r10(c.per.k)} kcal</b> · ${Math.round(c.per.c)} g KH · ${Math.round(c.per.p)} g Eiweiß · ${Math.round(c.per.f)} g Fett</div>` : ""}
+    <small>${c.miss.length ? `Noch ohne Wert: ${c.miss.map(esc).join(", ")}` : c.own ? "Von dir für dieses Rezept eingetragen" : "Richtwerte, berechnet aus den Zutaten (roh)"}</small>
+    <button class="g" id="kc">${c.miss.length ? "Fehlende Werte eintragen" : "Werte ansehen / ändern"}</button></div>`;
 }
-/* Kalorienwerte je Zutat ansehen und anpassen; gilt für alle Rezepte mit dieser Zutat */
+/* Nährwerte ansehen und ändern: fürs ganze Rezept oder je Zutat (gilt dann für alle Rezepte mit dieser Zutat) */
 function nutriDlg(r){
-  const rows = r.ingredients.filter(i => i.qty).map((i, n) => {
+  const o = r.own || {}, c = kcalOf(r);
+  const inp = (cls, v, ph) => `<input type="number" inputmode="decimal" class="${cls}" value="${v ?? ""}" placeholder="${ph}">`;
+  const rows = r.ingredients.filter(i => i.qty).map(i => {
     const nu = nutriOf(i.name), u = i.unit || "Stk", weight = /^(g|kg|ml|l|cl)$/i.test(u);
     const per = weight ? null : (nu.g[u] ?? nu.g[cap(u)] ?? UNIT_G[u] ?? UNIT_G[cap(u.toLowerCase())] ?? "");
-    return `<li data-n="${n}" data-name="${esc(i.name)}" data-u="${esc(u)}"><span class="nm">${esc(i.name)}<small>${fmt(i.qty, i.unit) || i.qty}</small></span>
-      <label>kcal/100 g<input type="number" inputmode="decimal" class="k" value="${nu.k ?? ""}" placeholder="?"></label>
-      ${weight ? "" : `<label>g pro ${esc(u)}<input type="number" inputmode="decimal" class="w" value="${per}" placeholder="?"></label>`}</li>`;
+    return `<li data-name="${esc(i.name)}" data-u="${esc(u)}"><span class="nm">${esc(i.name)}<small>${fmt(i.qty, i.unit) || i.qty}${nu.own ? " · eigene Werte" : ""}</small></span>
+      <label>kcal${inp("k", nu.k, "?")}</label><label>KH g${inp("c", nu.c, "?")}</label><label>Eiweiß g${inp("p", nu.p, "?")}</label><label>Fett g${inp("f", nu.f, "?")}</label>
+      ${weight ? "" : `<label>g pro ${esc(u)}${inp("w", per, "?")}</label>`}</li>`;
   }).join("");
   $("#dlg").innerHTML = `<button class="x" id="x" aria-label="Schließen">✕</button><div class="pad">
-    <h2 style="margin-top:0">Kalorien: ${esc(r.name)}</h2>
-    <p class="mute">Eingebaute Richtwerte, die du ändern kannst. Deine Werte gelten für alle Rezepte mit dieser Zutat. Werte stehen z.&nbsp;B. auf der Packung.</p>
+    <h2 style="margin-top:0">Nährwerte: ${esc(r.name)}</h2>
+    <div class="ownbox"><b>Für das ganze Rezept selbst eintragen</b><span class="mute">pro 100 g, z.&nbsp;B. aus einer Nährwert-App. Leer lassen = aus den Zutaten berechnen.</span>
+      <div class="nut4"><label>kcal${inp("ok", o.k, Math.round(c.own ? "" : c.per100.k) || "")}</label><label>KH g${inp("oc", o.c, "")}</label><label>Eiweiß g${inp("op", o.p, "")}</label><label>Fett g${inp("of", o.f, "")}</label></div></div>
+    <h4 style="margin:16px 0 2px">Oder je Zutat (pro 100 g)</h4>
+    <p class="mute" style="margin:0 0 6px">Eingebaute Richtwerte, die du ändern kannst, z.&nbsp;B. mit den Angaben von der Packung. Gilt für alle Rezepte mit dieser Zutat.</p>
     <ul class="clean nut">${rows}</ul>
     <div class="row acts" style="margin-top:14px"><span class="sp"></span><button class="g" id="cx">Zurück</button><button class="b main" id="sv">Speichern</button></div></div>`;
   openDlg();
   $("#x").onclick = () => $("#dlg").close();
   $("#cx").onclick = () => detail(r.id);
   $("#sv").onclick = () => {
+    /* ganzes Rezept */
+    const ov = {k: num($(".ownbox .ok").value), c: num($(".ownbox .oc").value), p: num($(".ownbox .op").value), f: num($(".ownbox .of").value)};
+    if (!isNaN(ov.k)) r.own = Object.fromEntries(Object.entries(ov).filter(([, v]) => !isNaN(v))); else delete r.own;
+    /* je Zutat: nur speichern, was vom eingebauten Wert abweicht */
     S.nutri ||= {};
     document.querySelectorAll(".nut li").forEach(li => {
-      const name = li.dataset.name.toLowerCase().trim(), u = li.dataset.u, k = num(li.querySelector(".k").value), wEl = li.querySelector(".w"), w = wEl ? num(wEl.value) : NaN;
-      const hit = NUTRI.find(([re]) => re.test(name)), base = {k: hit?.[1], g: hit?.[2]?.[u] ?? UNIT_G[u]};
-      const own = {...(S.nutri[name] || {})};
-      if (!isNaN(k) && k !== base.k) own.k = k; else if (k === base.k) delete own.k;
-      if (!isNaN(w) && w !== base.g) own.g = {...(own.g || {}), [u]: w};
+      const name = li.dataset.name.toLowerCase().trim(), u = li.dataset.u, hit = NUTRI.find(([re]) => re.test(name));
+      const base = {k: hit?.[1], p: hit?.[3], c: hit?.[4], f: hit?.[5]}, own = {...(S.nutri[name] || {})};
+      for (const x of "kcpf") { const v = num(li.querySelector("." + x).value);
+        if (!isNaN(v) && v !== base[x]) own[x] = v; else delete own[x] }
+      const wEl = li.querySelector(".w");
+      if (wEl) { const w = num(wEl.value), bw = hit?.[2]?.[u] ?? UNIT_G[u];
+        if (!isNaN(w) && w !== bw) own.g = {...(own.g || {}), [u]: w}; else if (own.g) { delete own.g[u]; if (!Object.keys(own.g).length) delete own.g } }
       if (Object.keys(own).length) S.nutri[name] = own; else delete S.nutri[name];
     });
     save(); detail(r.id); render();
@@ -608,7 +642,7 @@ function editor(r){
     const name = $("#en").value.trim(); if (!name) return alert("Bitte einen Namen eingeben.");
     const rec = {id: e.id || uid(), name, portions: Math.max(1, +$("#ep").value || 1),
       tags: $("#et").value.split(",").map(s => s.trim()).filter(Boolean),
-      ingredients: $("#ei").value.split("\n").map(parseLine).filter(Boolean), steps: $("#es").value.trim(), img, edited: true};
+      ingredients: $("#ei").value.split("\n").map(parseLine).filter(Boolean), steps: $("#es").value.trim(), img, edited: true, ...(e.own ? {own: e.own} : {})};
     const i = S.recipes.findIndex(x => x.id === rec.id); i >= 0 ? S.recipes[i] = rec : S.recipes.push(rec);
     save(); $("#dlg").close(); render();
   };
