@@ -1,7 +1,7 @@
 /* Offline-Speicher für das Kochbuch.
    Zeigt sofort die gespeicherte Version und lädt im Hintergrund die neueste nach
    (sichtbar beim nächsten Öffnen). Bei Änderungen an der App VERSION erhöhen. */
-const VERSION = "kochbuch-v4";
+const VERSION = "kochbuch-v5";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/favicon.png"];
 
 self.addEventListener("install", e => {
