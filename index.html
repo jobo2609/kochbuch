@@ -115,6 +115,9 @@ main{padding-top:8px;padding-bottom:60px}
 .step button:active{background:var(--fill2)}
 .step button + b + button{border-left:0}
 .step b{min-width:28px;text-align:center;font-weight:600;font-size:17px}
+.step.mini .box{height:28px;border-radius:8px}.step.mini button{width:34px;height:28px;font-size:17px}.step.mini b{min-width:22px;font-size:15px}
+.pp{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--mute)}
+.pp span{display:flex;align-items:center;gap:4px}.pp .own{color:var(--acc);font-weight:600}
 
 /* Einkaufsliste mit runden Häkchen (wie Erinnerungen) */
 .chk{width:24px;height:24px;flex:none;border-radius:50%;border:1.5px solid var(--mute2);display:grid;place-items:center;transition:background .25s var(--ease),border-color .25s}
@@ -410,8 +413,10 @@ function randomize(){
   while (picked.length < need && S.recipes.length) picked.push(S.recipes[Math.floor(Math.random()*S.recipes.length)].id);
   S.plan = [...keep, ...picked]; S.checked = {}; save();
 }
+/* Personen je Gericht: eigene Zahl fürs Gericht, sonst die allgemeine Einstellung */
+const servOf = id => (S.servings || {})[id] ?? S.people;
 function togglePlan(id){
-  if (S.plan.includes(id)) { S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id) }
+  if (S.plan.includes(id)) { S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id); if (S.servings) delete S.servings[id] }
   else S.plan.push(id);
   S.checked = {}; save();
 }
@@ -419,7 +424,7 @@ function shopping(){
   const map = {};
   for (const id of S.plan) {
     const r = byId(id); if (!r) continue;
-    const f = S.people / (r.portions || 1);
+    const f = servOf(id) / (r.portions || 1);
     for (const i of r.ingredients) {
       let qty = (i.qty || 0) * f, unit = i.unit || "";
       const u = UNITS[unit.toLowerCase()]; if (u) { qty *= u[1]; unit = u[0] }
@@ -450,6 +455,7 @@ const ICO = {
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   pencil: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/>'
 };
+const ICONP = '<svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
 const ic = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24">${ICO[n]}</svg>`;
 const TITLES = {recipes: "Rezepte", plan: "Woche", shop: "Einkauf", me: "Profil"};
 let lastTab = null, popped = null;
@@ -465,7 +471,8 @@ function render(){
   popped = null;
 }
 /* Plus/Minus-Regler (wie UIStepper) für Kochtage und Personen */
-const stepper = k => `<div class="step"><div class="box"><button data-set="${k}" data-d="-1" aria-label="weniger">−</button><b>${S[k]}</b><button data-set="${k}" data-d="1" aria-label="mehr">+</button></div></div>`;
+const stepper = (k, mini) => { const v = k.startsWith("sv:") ? servOf(k.slice(3)) : S[k];
+  return `<div class="step ${mini ? "mini" : ""}"><div class="box"><button data-set="${k}" data-d="-1" aria-label="weniger">−</button><b>${v}</b><button data-set="${k}" data-d="1" aria-label="mehr">+</button></div></div>` };
 
 /* Symbol + Farbton je Gericht, abgeleitet aus Kategorien und Name */
 const LOOKS = [[/suppe/,"🍲",28],[/pasta|spaghetti|nudel/,"🍝",12],[/salat/,"🥗",110],[/bowl/,"🥙",40],[/hähnchen|chicken/,"🍗",35],[/reis/,"🍚",190],[/auflauf|pie/,"🥘",20],[/hack/,"🥩",0],[/sauce|brokkoli/,"🥦",130],[/spinat|vegetarisch/,"🥬",140],[/süß|pfannkuchen/,"🥞",45]];
@@ -511,13 +518,13 @@ function vPlan(){
     <h1 class="lt">Diese Woche</h1>
     <p class="sub">${n} von ${S.days} Gerichten · ${msg}</p>
     <div class="prog ${n >= S.days ? "full" : ""}"><i style="width:${Math.min(100, n / S.days * 100)}%"></i></div>
-    <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Kochtage</span>${stepper("days")}</div></div>
+    <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Kochtage</span>${stepper("days")}</div><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
     <div class="btns noprint"><button class="btn" id="roll">${ic("shuffle")} Zufällig würfeln</button><button class="btn gray" id="clear" style="flex:0 0 auto">Leeren</button></div>
     <div class="sh"><span>Gerichte</span></div>
     <div class="list rl" style="--ins:72px">${items.map((r,i) => { const lk = S.locked.includes(r.id), k = kcalTxt(r).replace("🔥 ", ""); return `
       <div class="li">
         <div class="tap" data-open="${r.id}">${thumb(r, "s")}</div>
-        <div class="t tap" data-open="${r.id}"><span class="cap">Gericht ${i+1}${lk ? " · fixiert" : ""}${i >= S.days ? " · extra" : ""}</span><b>${esc(r.name)}</b><small>${r.ingredients.length} Zutaten${k ? " · " + k + " pro Portion" : ""}</small></div>
+        <div class="t tap" data-open="${r.id}"><span class="cap">Gericht ${i+1}${lk ? " · fixiert" : ""}${i >= S.days ? " · extra" : ""}</span><b>${esc(r.name)}</b><small>${r.ingredients.length} Zutaten${k ? " · " + k + " pro Portion" : ""}</small><div class="pp noprint"><span class="${servOf(r.id) !== S.people ? "own" : ""}">${ICONP} Personen</span>${stepper("sv:" + r.id, true)}</div></div>
         <button class="ibtn ${lk ? "" : "mute"} noprint" data-lock="${r.id}" aria-label="${lk ? "Fixierung lösen" : "Fixieren"}">${ic(lk ? "lock" : "unlock")}</button>
         <button class="ibtn noprint" data-reroll="${r.id}" aria-label="Neu würfeln">${ic("shuffle")}</button>
         <button class="ibtn red noprint" data-pick="${r.id}" aria-label="Entfernen">${ic("minus")}</button>
@@ -534,7 +541,7 @@ function vPlan(){
     if (!pool.length) return alert("Keine weiteren Rezepte zum Tauschen vorhanden.");
     S.plan[S.plan.indexOf(id)] = pool[Math.floor(Math.random()*pool.length)]; S.locked = S.locked.filter(x => x!==id); S.checked = {}; save(); render() });
   document.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { togglePlan(b.dataset.pick); render() });
-  document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => detail(b.dataset.open));
+  document.querySelectorAll("[data-open]").forEach(b => b.onclick = e => { if (!e.target.closest(".pp")) detail(b.dataset.open) });
 }
 
 /* Einkaufsliste nach Supermarkt-Bereichen; Reihenfolge der Prüfung: erste passende Regel gewinnt */
@@ -555,7 +562,8 @@ function vShop(){
     <h1 class="lt">Einkaufsliste</h1>
     <p class="sub" id="ssub"></p>
     ${items.length ? `<div class="prog" id="sprog"><i></i></div>` : ""}
-    <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Personen</span>${stepper("people")}</div></div>
+    <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
+    <p class="sf noprint">Die Mengen passen sich automatisch an. Für einzelne Gerichte (z.&nbsp;B. wenn Gäste kommen) stellst du die Personen in der <a href="#" data-gotab="plan" style="color:var(--acc)">Woche</a> ein.</p>
     ${items.length ? `<div class="tools noprint" style="margin-top:12px">${navigator.share ? `<button class="btn gray sm2" id="share">${ic("share")} Teilen</button>` : ""}<button class="btn gray sm2" id="copy">${ic("copy")} Kopieren</button><button class="btn gray sm2" id="reset">${ic("reset")} Zurücksetzen</button><button class="btn gray sm2 desk" onclick="print()">${ic("print")} Drucken</button></div>
     <div class="shop">${groups.map((g, gi) => `<div class="sh"><span>${g.title}</span><span data-cnt="${gi}"></span></div><div class="list" data-g="${gi}">${g.list.map(i => `
       <div class="li tap ${S.checked[i.key] ? "done" : ""}" data-k="${esc(i.key)}"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
@@ -635,13 +643,14 @@ function nutriDlg(r){
   };
 }
 function detail(id){
-  const r = byId(id), f = S.people / (r.portions || 1), sel = S.plan.includes(id);
+  const r = byId(id), n = servOf(id), f = n / (r.portions || 1), sel = S.plan.includes(id);
   $("#dlg").innerHTML = `<button class="x" id="x" aria-label="Schließen">${ic("x")}</button>${hero(r)}<div class="pad">
     <h2 class="dt">${esc(r.name)}</h2>
     <div>${(r.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
     <button class="btn ${sel ? "done" : ""}" id="pk" style="width:100%;margin-top:12px">${ic(sel ? "check" : "plus")} ${sel ? "Eingeplant – entfernen" : "In die Woche"}</button>
     ${kcalBox(r)}
-    <div class="sh"><span>Zutaten für ${S.people} Person${S.people === 1 ? "" : "en"}</span><span style="text-transform:none">Rezept: ${r.portions}</span></div>
+    <div class="sh"><span>Zutaten für ${n} Person${n === 1 ? "" : "en"}</span><span style="text-transform:none">Rezept: ${r.portions}</span></div>
+    <div class="list" style="margin-bottom:10px"><div class="li"><span class="t">Personen${n !== S.people ? ` <small style="display:inline;color:var(--acc)">· eigene Zahl</small>` : ""}</span>${stepper("sv:" + id)}</div></div>
     <div class="list ing">${r.ingredients.map(i => `<div class="li"><span class="q">${i.qty ? nice(i.qty*f, i.unit) : (i.unit || "–")}</span><span class="t">${esc(i.name)}</span></div>`).join("")}</div>
     ${r.steps ? `<div class="sh"><span>Zubereitung</span></div><div class="list"><div class="steps">${esc(r.steps)}</div></div>` : ""}
     <div class="list" style="margin-top:22px"><div class="li tap" id="ed"><span class="t act">Bearbeiten</span>${ic("pencil", "chev")}</div><div class="li tap" id="del"><span class="t act red">Rezept löschen</span>${ic("trash", "chev")}</div></div></div>`;
@@ -791,9 +800,16 @@ $("#add").onclick = () => editor();
 /* Plus/Minus-Regler stehen in den Seiten selbst */
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-set]"); if (!b) return;
-  const k = b.dataset.set, max = k === "days" ? 14 : 20;
-  S[k] = Math.min(max, Math.max(1, S[k] + +b.dataset.d)); save(); render();
+  const k = b.dataset.set, d = +b.dataset.d;
+  if (k.startsWith("sv:")) {   /* Personen für ein einzelnes Gericht */
+    const id = k.slice(3), v = Math.min(30, Math.max(1, servOf(id) + d));
+    S.servings ||= {}; if (v === S.people) delete S.servings[id]; else S.servings[id] = v;
+    save(); if (dlg.open && $("#pk")) detail(id); render(); return;
+  }
+  const max = k === "days" ? 14 : 30;
+  S[k] = Math.min(max, Math.max(1, S[k] + d)); save(); render();
 });
+document.addEventListener("click", e => { const a = e.target.closest("[data-gotab]"); if (!a) return; e.preventDefault(); tab = a.dataset.gotab; scrollTo(0, 0); render() });
 /* großer Titel wird beim Scrollen zum kleinen Titel in der Kopfzeile (wie in iOS) */
 const onScroll = () => document.body.classList.toggle("scrolled", scrollY > 40);
 addEventListener("scroll", onScroll, {passive: true});
