@@ -1,11 +1,13 @@
 /* Offline-Speicher für das Kochbuch.
-   Zeigt sofort die gespeicherte Version und lädt im Hintergrund die neueste nach
-   (sichtbar beim nächsten Öffnen). Bei Änderungen an der App VERSION erhöhen. */
-const VERSION = "kochbuch-v13";
+   Die App-Seite selbst wird immer zuerst frisch aus dem Internet geholt (damit Updates sofort
+   ankommen); nur ohne Netz oder bei sehr langsamer Verbindung kommt die gespeicherte Version.
+   Bilder und Icons kommen sofort aus dem Speicher und werden im Hintergrund aufgefrischt.
+   Bei Änderungen an der App VERSION erhöhen (und APP_VERSION in index.html). */
+const VERSION = "kochbuch-v14";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/favicon.png"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(f => new Request(f, {cache: "reload"})))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys()
@@ -13,12 +15,18 @@ self.addEventListener("activate", e => {
     .then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", e => {
-  const req = e.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const req = e.request, url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== location.origin) return;
+  const page = req.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith(".html");
   e.respondWith(caches.open(VERSION).then(async cache => {
-    const hit = await cache.match(req, {ignoreSearch: true}) || (req.mode === "navigate" && await cache.match("./"));
-    const net = fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; });
-    if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+    const hit = await cache.match(req, {ignoreSearch: true}) || (page && await cache.match("./"));
+    const net = fetch(req, {cache: "no-cache"}).then(res => { if (res.ok) cache.put(page ? "./" : req, res.clone()); return res });
+    if (page) {
+      /* Netz zuerst, nach 4 Sekunden ohne Antwort die gespeicherte Seite */
+      const slow = new Promise(ok => setTimeout(() => ok(hit), 4000));
+      try { return (await Promise.race([net, slow])) || await net } catch { return hit || Response.error() }
+    }
+    if (hit) { e.waitUntil(net.catch(() => {})); return hit }
     return net;
   }));
 });

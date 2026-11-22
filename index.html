@@ -211,7 +211,7 @@ dialog.closing::backdrop{animation:fadeOut .25s ease forwards}
   #tb{display:block;font-size:17px;font-weight:600;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
   body.scrolled header{background:var(--bar);border-bottom-color:var(--sep);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
   body.scrolled #tb{opacity:1;transform:none}
-  main.wrap{padding-top:44px;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+  main.wrap{padding-top:44px;padding-bottom:calc(max(var(--navh, 90px), 90px) + env(safe-area-inset-bottom) + 40px)}
   /* Tableiste unten mit Milchglas */
   nav{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;gap:0;border-radius:0;padding:6px 4px calc(4px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
   nav button{flex:1;flex-direction:column;gap:3px;padding:2px 0;border-radius:0;font-size:10px;font-weight:500;color:var(--mute);background:none!important;box-shadow:none!important}
@@ -295,6 +295,7 @@ for (const r of SEED) {
 }
 save();
 let tab = "recipes", filterTag = "", search = "";
+const APP_VERSION = "14";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
 
 /* ---------- Hilfsfunktionen ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -791,7 +792,7 @@ function vMe(){
     </div>
     ${installed ? "" : `<div class="sh"><span>Als App installieren</span></div>
       <div class="list"><div class="li"><span class="t" style="font-size:15px;line-height:1.4">In Safari unten auf <b style="display:inline">Teilen</b> tippen, dann <b style="display:inline">„Zum Home-Bildschirm“</b>. Danach öffnest du das Kochbuch wie eine App, auch ohne Internet.</span></div></div>`}
-    <p class="sf" style="text-align:center;margin-top:24px">Mein Kochbuch · funktioniert auch offline</p>`;
+    <p class="sf" style="text-align:center;margin-top:24px">Mein Kochbuch · Version ${APP_VERSION} · funktioniert auch offline</p>`;
   $("#bx").onclick = exportData;
   $("#bi").onclick = importData;
   $("#cpy").onclick = copyData;
@@ -868,7 +869,20 @@ addEventListener("scroll", onScroll, {passive: true});
 render();
 
 /* App-Funktionen: offline nutzbar, Daten möglichst dauerhaft behalten */
-if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(() => {});
+/* Updates: beim Öffnen und beim Zurückkehren in die App nach einer neuen Version schauen;
+   ist eine da, lädt die Seite einmal neu, damit man sie sofort sieht. */
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController && !reloaded && !dlg.open) { reloaded = true; location.reload() } });
+  navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).then(reg => {
+    reg.update().catch(() => {});
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}) });
+  }).catch(() => {});
+}
+/* Abstand unten = echte Höhe der Leiste (inkl. Home-Balken), damit nichts verdeckt wird */
+const setNavH = () => document.documentElement.style.setProperty("--navh", $("nav").getBoundingClientRect().height + "px");
+setNavH(); addEventListener("resize", setNavH); new ResizeObserver(setNavH).observe($("nav"));
 navigator.storage?.persist?.().catch(() => {});
 </script>
 </body>
