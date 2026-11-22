@@ -44,7 +44,7 @@ nav .cnt{min-width:18px;height:18px;line-height:18px;border-radius:9px;backgroun
 nav .cnt:empty{display:none}
 nav .plus{order:9;margin-left:8px;background:var(--acc);color:#fff;font-weight:600}
 nav .plus .pl{font-size:18px;line-height:1}
-main{padding-top:8px;padding-bottom:60px}
+main.wrap{padding-top:8px;padding-bottom:60px}
 @media (max-width:900px){.bt{display:none}}
 @media (min-width:701px){nav{position:fixed;top:10px;right:max(16px,calc(50vw - 344px));z-index:21}}
 
@@ -128,6 +128,14 @@ main{padding-top:8px;padding-bottom:60px}
 .shop .done .t b{color:var(--mute);text-decoration:line-through}
 .shop .done .val{opacity:.5}
 .shop .li{--ins:52px}
+.li + .li::before{z-index:2}
+.sw{padding:0;overflow:hidden;transition:height .3s var(--ease),opacity .25s}
+.sw.gone{height:0!important;opacity:0}
+.swc{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 16px;background:var(--card);position:relative;z-index:1;transition:transform .35s var(--ease),background .25s}
+.sw.tap:active .swc{background:color-mix(in srgb,var(--card),#8e8e93 16%);transition:transform .35s var(--ease)}
+.swa{position:absolute;right:0;top:0;bottom:0;width:96px;border:0;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.havebtn{display:none;border:0;background:var(--fill);color:var(--acc);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer;opacity:0;transition:opacity .2s}
+@media (hover:hover){.havebtn{display:inline-block}.sw:hover .havebtn{opacity:1}.swa{display:none}}
 
 /* Profil */
 .prof{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 0 4px}
@@ -203,7 +211,7 @@ dialog.closing::backdrop{animation:fadeOut .25s ease forwards}
   #tb{display:block;font-size:17px;font-weight:600;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
   body.scrolled header{background:var(--bar);border-bottom-color:var(--sep);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
   body.scrolled #tb{opacity:1;transform:none}
-  main{padding-top:44px;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  main.wrap{padding-top:44px;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
   /* Tableiste unten mit Milchglas */
   nav{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;gap:0;border-radius:0;padding:6px 4px calc(4px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
   nav button{flex:1;flex-direction:column;gap:3px;padding:2px 0;border-radius:0;font-size:10px;font-weight:500;color:var(--mute);background:none!important;box-shadow:none!important}
@@ -462,7 +470,7 @@ let lastTab = null, popped = null;
 
 function render(){
   document.querySelectorAll("nav [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  const open = shopping().filter(i => !S.checked[i.key]).length;
+  const open = shopping().filter(i => !S.checked[i.key] && !(S.have || {})[hkey(i)]).length;
   $("#c3").textContent = open || "";
   $("#tb").textContent = TITLES[tab];
   ({recipes: vRecipes, plan: vPlan, shop: vShop, me: vMe})[tab]();
@@ -555,31 +563,73 @@ const AISLES = [
 const AISLE_ORDER = [4, 1, 2, 3, 0, 5];
 const aisleOf = name => { const n = name.toLowerCase(), i = AISLES.findIndex(([, re]) => re.test(n)); return i < 0 ? 5 : i };
 
+/* „Hab ich schon zu Hause“: gilt je Zutat (unabhängig von Menge/Einheit) und bleibt gespeichert */
+const hkey = i => i.name.trim().toLowerCase();
 function vShop(){
-  const items = shopping(), done = items.filter(i => S.checked[i.key]).length;
+  const all = shopping(), have = S.have || {};
+  const items = all.filter(i => !have[hkey(i)]), home = all.filter(i => have[hkey(i)]);
   const groups = AISLE_ORDER.map(a => ({title: a === 5 ? "🛒 Sonstiges" : AISLES[a][0], list: items.filter(i => aisleOf(i.name) === a)})).filter(g => g.list.length);
+  const amount = i => i.qty ? nice(i.qty, i.unit, true) : (i.unit || "");
   $("#view").innerHTML = `
     <h1 class="lt">Einkaufsliste</h1>
     <p class="sub" id="ssub"></p>
     ${items.length ? `<div class="prog" id="sprog"><i></i></div>` : ""}
+    ${items.length ? `<div class="btns noprint"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Haken zurücksetzen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>
+    <p class="sf noprint">Teilen geht z.&nbsp;B. per WhatsApp oder Nachrichten. Geteilt wird nur, was noch nicht abgehakt ist.</p>` : ""}
     <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
     <p class="sf noprint">Die Mengen passen sich automatisch an. Für einzelne Gerichte (z.&nbsp;B. wenn Gäste kommen) stellst du die Personen in der <a href="#" data-gotab="plan" style="color:var(--acc)">Woche</a> ein.</p>
-    ${items.length ? `<div class="tools noprint" style="margin-top:12px">${navigator.share ? `<button class="btn gray sm2" id="share">${ic("share")} Teilen</button>` : ""}<button class="btn gray sm2" id="copy">${ic("copy")} Kopieren</button><button class="btn gray sm2" id="reset">${ic("reset")} Zurücksetzen</button><button class="btn gray sm2 desk" onclick="print()">${ic("print")} Drucken</button></div>
-    <div class="shop">${groups.map((g, gi) => `<div class="sh"><span>${g.title}</span><span data-cnt="${gi}"></span></div><div class="list" data-g="${gi}">${g.list.map(i => `
-      <div class="li tap ${S.checked[i.key] ? "done" : ""}" data-k="${esc(i.key)}"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+    ${items.length ? `<div class="shop">${groups.map((g, gi) => `<div class="sh"><span>${g.title}</span><span data-cnt="${gi}"></span></div><div class="list" data-g="${gi}">${g.list.map(i => `
+      <div class="li tap sw ${S.checked[i.key] ? "done" : ""}" data-k="${esc(i.key)}" data-h="${esc(hkey(i))}"><button class="swa noprint" data-have="${esc(hkey(i))}">Hab ich</button>
+      <div class="swc"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <span class="t"><b>${esc(i.name)}</b><small>${[...new Set(i.from)].map(esc).join(", ")}</small></span>
-      <span class="val">${i.qty ? nice(i.qty, i.unit, true) : (i.unit || "")}</span></div>`).join("")}</div>`).join("")}</div>`
-      : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste erscheint, sobald Gerichte im Wochenplan stehen.</div>`}`;
+      <button class="havebtn noprint" data-have="${esc(hkey(i))}">Hab ich</button><span class="val">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
+      <p class="sf noprint">Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über eine Zutat und klicke auf" : "Wische eine Zutat nach links und tippe auf"} <b>Hab ich</b>, wenn du sie schon zu Hause hast. Dann verschwindet sie von der Liste.</p>`
+      : all.length ? `<div class="empty"><span class="big">🏠</span>Du hast alles zu Hause.</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste erscheint, sobald Gerichte im Wochenplan stehen.</div>`}
+    ${home.length ? `<div class="sh noprint"><span>Schon zu Hause</span><span>${home.length}</span></div>
+    <div class="list noprint">${home.map(i => `<div class="li"><span class="t" style="color:var(--mute)">${esc(i.name)}</span><span class="val">${amount(i)}</span><button class="btn gray sm2" data-back="${esc(hkey(i))}">Zurück</button></div>`).join("")}</div>
+    <p class="sf noprint">Diese Zutaten stehen nicht auf der Einkaufsliste und werden nicht geteilt. Mit <b>Zurück</b> holst du sie wieder auf die Liste.</p>` : ""}`;
   updShop();
+  document.querySelectorAll(".sw").forEach(swipeRow);
   /* Abhaken ohne die Seite neu zu zeichnen, damit die Animation sichtbar bleibt */
-  document.querySelectorAll("[data-k]").forEach(li => li.onclick = () => { const k = li.dataset.k; S.checked[k] = !S.checked[k]; save(); li.classList.toggle("done", !!S.checked[k]); updShop() });
+  document.querySelectorAll("[data-k]").forEach(li => li.onclick = e => {
+    if (li._swiped || e.target.closest("[data-have]")) return;
+    if (li.classList.contains("open")) return closeSwipe(li);
+    const k = li.dataset.k; S.checked[k] = !S.checked[k]; save(); li.classList.toggle("done", !!S.checked[k]); updShop() });
+  document.querySelectorAll("[data-have]").forEach(b => b.onclick = e => { e.stopPropagation(); markHave(b.closest(".sw")) });
+  document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { delete S.have[b.dataset.back]; save(); render() });
   if (!items.length) return;
   $("#reset").onclick = () => { S.checked = {}; save(); document.querySelectorAll("[data-k].done").forEach(li => li.classList.remove("done")); updShop() };
-  /* nur noch nicht abgehakte Zutaten weitergeben */
+  /* nur noch nicht abgehakte und nicht vorhandene Zutaten weitergeben */
   const text = () => groups.map(g => [g.title, g.list.filter(i => !S.checked[i.key])]).filter(([, l]) => l.length)
     .map(([t, l]) => t + "\n" + l.map(i => `- ${i.qty ? nice(i.qty, i.unit, true)+" " : ""}${i.name}`).join("\n")).join("\n\n");
-  const cp = $("#copy"); cp.onclick = () => navigator.clipboard.writeText(text()).then(() => cp.innerHTML = `${ic("check")} Kopiert`);
-  if ($("#share")) $("#share").onclick = () => navigator.share({title: "Einkaufsliste", text: "Einkaufsliste\n\n" + text()}).catch(() => {});
+  const cp = $("#copy"); cp.onclick = () => navigator.clipboard.writeText(text()).then(() => cp.innerHTML = ic("check"));
+  $("#share").onclick = () => { const t = "Einkaufsliste\n\n" + text();
+    if (navigator.share) navigator.share({title: "Einkaufsliste", text: t}).catch(() => {});
+    else open("https://wa.me/?text=" + encodeURIComponent(t), "_blank") };
+}
+/* Zutat als „zu Hause“ markieren: Zeile klappt zu, dann neu zeichnen */
+function markHave(row){
+  S.have ||= {}; S.have[row.dataset.h] = true; save();
+  row.style.height = row.offsetHeight + "px"; void row.offsetHeight; row.classList.add("gone");
+  setTimeout(render, 300);
+}
+/* Wischen nach links wie in iOS-Listen */
+let openRow = null;
+function closeSwipe(row){ row.classList.remove("open"); row.querySelector(".swc").style.transform = ""; if (openRow === row) openRow = null }
+function swipeRow(row){
+  const c = row.querySelector(".swc"), W = 96; let x0 = null, y0 = 0, dx = 0, drag = false;
+  row.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; drag = false; dx = 0; if (openRow && openRow !== row) closeSwipe(openRow) }, {passive: true});
+  row.addEventListener("touchmove", e => {
+    if (x0 == null) return;
+    const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+    if (!drag) { if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) { drag = true; c.style.transition = "none" } else if (Math.abs(my) > 8) { x0 = null; return } else return }
+    e.preventDefault(); dx = Math.min(0, mx - (row.classList.contains("open") ? W : 0)); c.style.transform = `translateX(${dx}px)`;
+  }, {passive: false});
+  row.addEventListener("touchend", () => {
+    if (!drag) return; drag = false; c.style.transition = ""; row._swiped = true; setTimeout(() => row._swiped = false, 60);
+    if (dx < -row.offsetWidth * .6) return markHave(row);          /* ganz durchgewischt */
+    if (dx < -W / 2) { row.classList.add("open"); c.style.transform = `translateX(-${W}px)`; openRow = row } else closeSwipe(row);
+  });
 }
 /* Zähler, Fortschritt und Abzeichen der Einkaufsliste aktualisieren */
 function updShop(){
