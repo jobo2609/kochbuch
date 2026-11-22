@@ -133,9 +133,14 @@ main.wrap{padding-top:8px;padding-bottom:60px}
 .sw.gone{height:0!important;opacity:0}
 .swc{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 16px;background:var(--card);position:relative;z-index:1;transition:transform .35s var(--ease),background .25s}
 .sw.tap:active .swc{background:color-mix(in srgb,var(--card),#8e8e93 16%);transition:transform .35s var(--ease)}
-.swa{position:absolute;right:0;top:0;bottom:0;width:96px;border:0;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.swas{position:absolute;right:0;top:0;bottom:0;display:flex}
+.swa2{width:88px;border:0;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.swa2.gray{background:#8e8e93}.swa2.red{background:var(--red)}
+.hov{display:none;gap:6px}
+.pop2 .swc{animation:flash 1.4s ease}
+@keyframes flash{0%,30%{background:var(--accf)}100%{background:var(--card)}}
 .havebtn{display:none;border:0;background:var(--fill);color:var(--acc);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer;opacity:0;transition:opacity .2s}
-@media (hover:hover){.havebtn{display:inline-block}.sw:hover .havebtn{opacity:1}.swa{display:none}}
+@media (hover:hover){.hov{display:inline-flex}.havebtn{display:inline-block}.sw:hover .havebtn{opacity:1}.swas{display:none}}
 
 /* Profil */
 .prof{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 0 4px}
@@ -295,7 +300,7 @@ for (const r of SEED) {
 }
 save();
 let tab = "recipes", filterTag = "", search = "";
-const APP_VERSION = "15";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
+const APP_VERSION = "16";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
 
 /* ---------- Hilfsfunktionen ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -471,7 +476,7 @@ let lastTab = null, popped = null;
 
 function render(){
   document.querySelectorAll("nav [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  const open = shopping().filter(i => !S.checked[i.key] && !(S.have || {})[hkey(i)]).length;
+  const open = shopItems().filter(i => !S.checked[i.key]).length;
   $("#c3").textContent = open || "";
   $("#tb").textContent = TITLES[tab];
   ({recipes: vRecipes, plan: vPlan, shop: vShop, me: vMe})[tab]();
@@ -553,23 +558,39 @@ function vPlan(){
   document.querySelectorAll("[data-open]").forEach(b => b.onclick = e => { if (!e.target.closest(".pp")) detail(b.dataset.open) });
 }
 
-/* Einkaufsliste nach Supermarkt-Bereichen; Reihenfolge der Prüfung: erste passende Regel gewinnt */
+/* Einkaufsliste nach Supermarkt-Bereichen. Erste passende Regel gewinnt (Reihenfolge hier),
+   angezeigt wird in der Reihenfolge eines Supermarkt-Rundgangs (AISLE_ORDER). */
 const AISLES = [
-  ["🥫 Konserven, Saucen & Würze", /passierte|tomatenmark|brüh|soja|senf|ketchup|miracel|essig|öl\b|öl |honig|balsamico|worcester|sriracha|röstzwiebel|gurke|rotwein|zucker|currypaste|kokosmilch|kichererbsen/],
-  ["🥩 Fleisch & Wurst", /hack|hähnchen|fleisch|schinken|lyoner|wurst/],
-  ["🧀 Milch, Käse & Eier", /sahne|käse|feta|parmesan|cheddar|milch|butter|joghurt|skyr|crème|creme|schmand|^ei\b/],
-  ["🍝 Nudeln, Reis & Trockenes", /spaghetti|nudel|reis|linsen|brot|walnüsse|nüsse|mehl/],
-  ["🥬 Gemüse & Obst", /kartoffel|zwiebel|lauch|porree|knoblauch|karotte|tomate|paprika|zucchini|brokkoli|spinat|salat|bohnen|erbsen|granatapfel|basilikum|schnittlauch|suppengrün/]
+  ["🧴 Drogerie & Haushalt", /klopapier|toilettenpapier|küchenrolle|küchenpapier|taschentücher|spülmittel|spültabs|waschmittel|weichspüler|zahnpasta|zahnbürste|shampoo|duschgel|seife|deo|müllbeutel|alufolie|frischhaltefolie|backpapier|schwamm|putzmittel|reiniger|windeln|batterie|kerze|servietten/],
+  ["🧊 Tiefkühl", /\(tk\)|\btk\b|tiefkühl|pizza|pommes|\beis\b|eiscreme|fischstäbchen/],
+  ["🥫 Konserven, Saucen & Würze", /passierte|tomatenmark|brüh|soja|senf|ketchup|miracel|mayo|essig|öl\b|öl |öl$|honig|balsamico|worcester|sriracha|röstzwiebel|gewürzgurke|saure gurke|essiggurke|rotwein|zucker|currypaste|kokosmilch|kichererbsen|dose|pesto|salz|pfeffer|gewürz|paprikapulver|oregano|marmelade|nutella|erdnussbutter/],
+  ["🥩 Fleisch, Wurst & Fisch", /hack|hähnchen|huhn|pute|fleisch|schinken|speck|lyoner|wurst|salami|würstchen|lachs|thunfisch|fisch|garnele/],
+  ["🧀 Milch, Käse & Eier", /sahne|käse|feta|parmesan|cheddar|mozzarella|milch|butter|joghurt|skyr|quark|crème|creme|schmand|margarine|^eier?\b|\beier\b/],
+  ["🥖 Brot & Backwaren", /brot|brötchen|toast|baguette|croissant|wrap|tortilla|laugen|brezel/],
+  ["🍝 Nudeln, Reis & Trockenes", /spaghetti|nudel|reis|linsen|walnüsse|nüsse|mandeln|mehl|haferflocken|müsli|cornflakes|backpulver|hefe/],
+  ["🍫 Süßes & Snacks", /schoko|chips|keks|gummi|bonbon|riegel|popcorn|kuchen|süßigkeit/],
+  ["🥤 Getränke", /wasser(?!melone)|saft|cola|limo|sprudel|\bbier\b|\bwein\b|weißwein|sekt|prosecco|kaffee|\btee\b|eistee|schorle|energy/],
+  ["🥬 Gemüse & Obst", /kartoffel|zwiebel|lauch|porree|knoblauch|karotte|möhre|tomate|paprika|zucchini|brokkoli|spinat|salat|bohnen|erbsen|granatapfel|basilikum|schnittlauch|petersilie|kräuter|suppengrün|gurke|apfel|äpfel|banane|birne|orange|zitrone|limette|beere|traube|kiwi|mango|melone|avocado|pilz|champignon|aubergine|kürbis|ingwer|obst|gemüse|sellerie|radieschen|rucola/]
 ];
-const AISLE_ORDER = [4, 1, 2, 3, 0, 5];
-const aisleOf = name => { const n = name.toLowerCase(), i = AISLES.findIndex(([, re]) => re.test(n)); return i < 0 ? 5 : i };
+const OTHER = AISLES.length;
+const AISLE_ORDER = [9, 5, 3, 4, 6, 2, 7, 8, 1, 0, OTHER];
+const aisleName = a => a === OTHER ? "🛒 Sonstiges" : AISLES[a][0];
+/* eigene Zuordnung (S.aisleOv) hat Vorrang vor der automatischen */
+const aisleOf = name => { const n = name.toLowerCase().trim(), o = (S.aisleOv || {})[n]; if (o != null) return o;
+  const i = AISLES.findIndex(([, re]) => re.test(n)); return i < 0 ? OTHER : i };
 
 /* „Hab ich schon zu Hause“: gilt je Zutat (unabhängig von Menge/Einheit) und bleibt gespeichert */
 const hkey = i => i.name.trim().toLowerCase();
+/* alles, was auf der Liste steht: Zutaten der Woche (ohne „zu Hause“) + eigene Artikel */
+function shopItems(){
+  const have = S.have || {};
+  const fromPlan = shopping().filter(i => !have[hkey(i)]);
+  const extra = (S.extra || []).map(x => ({key: "x:" + x.id, name: x.name, qty: x.qty, unit: x.unit, from: ["Eigener Eintrag"], extra: x.id}));
+  return [...fromPlan, ...extra];
+}
 function vShop(){
-  const all = shopping(), have = S.have || {};
-  const items = all.filter(i => !have[hkey(i)]), home = all.filter(i => have[hkey(i)]);
-  const groups = AISLE_ORDER.map(a => ({title: a === 5 ? "🛒 Sonstiges" : AISLES[a][0], list: items.filter(i => aisleOf(i.name) === a)})).filter(g => g.list.length);
+  const all = shopping(), have = S.have || {}, items = shopItems(), home = all.filter(i => have[hkey(i)]);
+  const groups = AISLE_ORDER.map(a => ({a, title: aisleName(a), list: items.filter(i => aisleOf(i.name) === a)})).filter(g => g.list.length);
   const amount = i => i.qty ? nice(i.qty, i.unit, true) : (i.unit || "");
   $("#view").innerHTML = `
     <h1 class="lt">Einkaufsliste</h1>
@@ -577,30 +598,43 @@ function vShop(){
     ${items.length ? `<div class="prog" id="sprog"><i></i></div>` : ""}
     ${items.length ? `<div class="btns noprint"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Haken zurücksetzen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>
     <p class="sf noprint">Teilen geht z.&nbsp;B. per WhatsApp oder Nachrichten. Geteilt wird nur, was noch nicht abgehakt ist.</p>` : ""}
+    <form class="list noprint" id="addf" style="margin-top:14px"><div class="li"><span class="addb on" style="width:28px;height:28px">${ic("plus")}</span><input class="fi" id="addi" placeholder="Artikel hinzufügen, z. B. 2 l Milch" enterkeyhint="done" autocomplete="off"><button class="btn sm2" id="addb" style="display:none">Hinzufügen</button></div></form>
+    <p class="sf noprint" id="addh">Auch Dinge, die in keinem Rezept stehen, z.&nbsp;B. Klopapier. Der Bereich wird automatisch erkannt.</p>
     <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
     <p class="sf noprint">Die Mengen passen sich automatisch an. Für einzelne Gerichte (z.&nbsp;B. wenn Gäste kommen) stellst du die Personen in der <a href="#" data-gotab="plan" style="color:var(--acc)">Woche</a> ein.</p>
-    ${items.length ? `<div class="shop">${groups.map((g, gi) => `<div class="sh"><span>${g.title}</span><span data-cnt="${gi}"></span></div><div class="list" data-g="${gi}">${g.list.map(i => `
-      <div class="li tap sw ${S.checked[i.key] ? "done" : ""}" data-k="${esc(i.key)}" data-h="${esc(hkey(i))}"><button class="swa noprint" data-have="${esc(hkey(i))}">Hab ich</button>
+    ${items.length ? `<div class="shop">${groups.map(g => `<div class="sh"><span>${g.title}</span><span data-cnt="${g.a}"></span></div><div class="list" data-g="${g.a}">${g.list.map(i => `
+      <div class="li tap sw ${S.checked[i.key] ? "done" : ""} ${i.extra && i.extra === justAdded ? "pop2" : ""}" data-k="${esc(i.key)}" data-h="${esc(hkey(i))}" data-n="${esc(i.name)}" ${i.extra ? `data-x="${i.extra}"` : ""}>
+      <div class="swas noprint"><button class="swa2 gray" data-area>Bereich</button>${i.extra ? `<button class="swa2 red" data-del>Löschen</button>` : `<button class="swa2" data-have>Hab ich</button>`}</div>
       <div class="swc"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <span class="t"><b>${esc(i.name)}</b><small>${[...new Set(i.from)].map(esc).join(", ")}</small></span>
-      <button class="havebtn noprint" data-have="${esc(hkey(i))}">Hab ich</button><span class="val">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
-      <p class="sf noprint">Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über eine Zutat und klicke auf" : "Wische eine Zutat nach links und tippe auf"} <b>Hab ich</b>, wenn du sie schon zu Hause hast. Dann verschwindet sie von der Liste.</p>`
-      : all.length ? `<div class="empty"><span class="big">🏠</span>Du hast alles zu Hause.</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste erscheint, sobald Gerichte im Wochenplan stehen.</div>`}
+      <span class="hov noprint"><button class="havebtn" data-area>Bereich</button>${i.extra ? `<button class="havebtn" data-del>Löschen</button>` : `<button class="havebtn" data-have>Hab ich</button>`}</span><span class="val">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
+      <p class="sf noprint">Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über einen Eintrag" : "Wische einen Eintrag nach links"}: <b>Hab ich</b> nimmt ihn von der Liste, <b>Bereich</b> ändert die Zuordnung, eigene Artikel kannst du <b>löschen</b>.</p>`
+      : all.length ? `<div class="empty"><span class="big">🏠</span>Du hast alles zu Hause.</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste füllt sich mit den Gerichten aus deinem Wochenplan. Eigene Artikel kannst du oben hinzufügen.</div>`}
     ${home.length ? `<div class="sh noprint"><span>Schon zu Hause</span><span>${home.length}</span></div>
     <div class="list noprint">${home.map(i => `<div class="li"><span class="t" style="color:var(--mute)">${esc(i.name)}</span><span class="val">${amount(i)}</span><button class="btn gray sm2" data-back="${esc(hkey(i))}">Zurück</button></div>`).join("")}</div>
     <p class="sf noprint">Diese Zutaten stehen nicht auf der Einkaufsliste und werden nicht geteilt. Mit <b>Zurück</b> holst du sie wieder auf die Liste.</p>` : ""}`;
+  justAdded = null;
   updShop();
+  /* eigenen Artikel hinzufügen: Menge und Einheit werden wie im Rezept erkannt */
+  const inp = $("#addi");
+  inp.oninput = () => { $("#addb").style.display = inp.value.trim() ? "" : "none";
+    const p = parseLine(inp.value); $("#addh").textContent = p ? `Kommt in: ${aisleName(aisleOf(p.name))}` : "Auch Dinge, die in keinem Rezept stehen, z. B. Klopapier. Der Bereich wird automatisch erkannt." };
+  $("#addf").onsubmit = ev => { ev.preventDefault(); const p = parseLine(inp.value); if (!p) return;
+    const id = uid(); (S.extra ||= []).push({id, name: p.name, qty: p.qty || 0, unit: p.unit || ""}); save(); justAdded = id; render();
+    setTimeout(() => { const f = $("#addi"); if (f) f.focus() }, 50) };
   document.querySelectorAll(".sw").forEach(swipeRow);
   /* Abhaken ohne die Seite neu zu zeichnen, damit die Animation sichtbar bleibt */
   document.querySelectorAll("[data-k]").forEach(li => li.onclick = e => {
-    if (li._swiped || e.target.closest("[data-have]")) return;
+    if (li._swiped || e.target.closest("[data-have],[data-del],[data-area]")) return;
     if (li.classList.contains("open")) return closeSwipe(li);
     const k = li.dataset.k; S.checked[k] = !S.checked[k]; save(); li.classList.toggle("done", !!S.checked[k]); updShop() });
-  document.querySelectorAll("[data-have]").forEach(b => b.onclick = e => { e.stopPropagation(); markHave(b.closest(".sw")) });
+  document.querySelectorAll("[data-have]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); (S.have ||= {})[row.dataset.h] = true; save(); collapse(row) });
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); S.extra = (S.extra || []).filter(x => x.id !== row.dataset.x); delete S.checked[row.dataset.k]; save(); collapse(row) });
+  document.querySelectorAll("[data-area]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); closeSwipe(row); areaDlg(row.dataset.n) });
   document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { delete S.have[b.dataset.back]; save(); render() });
   if (!items.length) return;
   $("#reset").onclick = () => { S.checked = {}; save(); document.querySelectorAll("[data-k].done").forEach(li => li.classList.remove("done")); updShop() };
-  /* nur noch nicht abgehakte und nicht vorhandene Zutaten weitergeben */
+  /* nur noch nicht abgehakte Einträge weitergeben */
   const text = () => groups.map(g => [g.title, g.list.filter(i => !S.checked[i.key])]).filter(([, l]) => l.length)
     .map(([t, l]) => t + "\n" + l.map(i => `- ${i.qty ? nice(i.qty, i.unit, true)+" " : ""}${i.name}`).join("\n")).join("\n\n");
   const cp = $("#copy"); cp.onclick = () => navigator.clipboard.writeText(text()).then(() => cp.innerHTML = ic("check"));
@@ -608,9 +642,21 @@ function vShop(){
     if (navigator.share) navigator.share({title: "Einkaufsliste", text: t}).catch(() => {});
     else open("https://wa.me/?text=" + encodeURIComponent(t), "_blank") };
 }
-/* Zutat als „zu Hause“ markieren: Zeile klappt zu, dann neu zeichnen */
-function markHave(row){
-  S.have ||= {}; S.have[row.dataset.h] = true; save();
+let justAdded = null;
+/* Bereich eines Eintrags ändern; gilt für alle Einträge mit diesem Namen */
+function areaDlg(name){
+  const cur = aisleOf(name), n = name.toLowerCase().trim();
+  $("#dlg").innerHTML = `${sheetHd("Abbrechen", "Bereich", "")}<div class="pad">
+    <p class="sf" style="margin:4px 16px 8px">Wo findest du <b>${esc(name)}</b> im Supermarkt?</p>
+    <div class="list">${AISLE_ORDER.map(a => `<div class="li tap" data-a="${a}"><span class="t">${aisleName(a)}</span>${a === cur ? ic("check", "act") : ""}</div>`).join("")}</div>
+    ${(S.aisleOv || {})[n] != null ? `<div class="list" style="margin-top:22px"><div class="li tap" id="auto"><span class="t act">Automatisch zuordnen</span></div></div>` : ""}</div>`;
+  openDlg();
+  $("#hl").onclick = closeDlg;
+  document.querySelectorAll("[data-a]").forEach(li => li.onclick = () => { (S.aisleOv ||= {})[n] = +li.dataset.a; save(); closeDlg(); render() });
+  if ($("#auto")) $("#auto").onclick = () => { delete S.aisleOv[n]; save(); closeDlg(); render() };
+}
+/* Zeile zuklappen, dann neu zeichnen */
+function collapse(row){
   row.style.height = row.offsetHeight + "px"; void row.offsetHeight; row.classList.add("gone");
   setTimeout(render, 300);
 }
@@ -618,7 +664,7 @@ function markHave(row){
 let openRow = null;
 function closeSwipe(row){ row.classList.remove("open"); row.querySelector(".swc").style.transform = ""; if (openRow === row) openRow = null }
 function swipeRow(row){
-  const c = row.querySelector(".swc"), W = 96; let x0 = null, y0 = 0, dx = 0, drag = false;
+  const c = row.querySelector(".swc"), W = 176; let x0 = null, y0 = 0, dx = 0, drag = false;
   row.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; drag = false; dx = 0; if (openRow && openRow !== row) closeSwipe(openRow) }, {passive: true});
   row.addEventListener("touchmove", e => {
     if (x0 == null) return;
@@ -628,14 +674,14 @@ function swipeRow(row){
   }, {passive: false});
   row.addEventListener("touchend", () => {
     if (!drag) return; drag = false; c.style.transition = ""; row._swiped = true; setTimeout(() => row._swiped = false, 60);
-    if (dx < -row.offsetWidth * .6) return markHave(row);          /* ganz durchgewischt */
     if (dx < -W / 2) { row.classList.add("open"); c.style.transform = `translateX(-${W}px)`; openRow = row } else closeSwipe(row);
   });
 }
 /* Zähler, Fortschritt und Abzeichen der Einkaufsliste aktualisieren */
 function updShop(){
   const all = document.querySelectorAll("[data-k]").length, done = document.querySelectorAll("[data-k].done").length;
-  $("#ssub").textContent = `${S.plan.length} Gericht${S.plan.length === 1 ? "" : "e"}${all ? ` · ${done} von ${all} erledigt` : ""}`;
+  const extra = (S.extra || []).length;
+  $("#ssub").textContent = `${S.plan.length} Gericht${S.plan.length === 1 ? "" : "e"}${extra ? ` + ${extra} eigene${extra === 1 ? "r Artikel" : " Artikel"}` : ""}${all ? ` · ${done} von ${all} erledigt` : ""}`;
   const p = $("#sprog"); if (p) { p.classList.toggle("full", all && done === all); p.firstChild.style.width = (all ? done / all * 100 : 0) + "%" }
   document.querySelectorAll("[data-g]").forEach(l => { const o = l.querySelectorAll("[data-k]:not(.done)").length; $(`[data-cnt="${l.dataset.g}"]`).textContent = o ? `${o} offen` : "✓ erledigt" });
   $("#c3").textContent = (all - done) || "";
