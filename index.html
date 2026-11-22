@@ -340,6 +340,19 @@ function parseLine(line){
   return {name: name.trim(), qty: num(q), unit: u};
 }
 const ingText = i => (i.qty ? fmt(i.qty, i.unit) + " " : "") + i.name;
+/* Mengen zum Kochen und Einkaufen sinnvoll aufrunden (die gespeicherten Rezepte bleiben exakt).
+   Einkauf: Stück, Gläser usw. auf ganze Packungen; Kochen: auf halbe, bei Glas/Ring/Flasche auf Viertel. */
+const up = (x, step) => Math.ceil(x / step - 1e-9) * step;
+function nice(qty, unit, shop){
+  const u = (unit || "").toLowerCase();
+  let q;
+  if (/^(g|ml)$/.test(u)) q = qty < 20 ? up(qty, 1) : qty < 200 ? up(qty, 5) : qty < 1000 ? up(qty, 10) : up(qty, 50);
+  else if (/^(kg|l)$/.test(u)) q = up(qty, .05);
+  else if (/^(el|tl|prise)$/.test(u)) q = up(qty, .5);
+  else if (/^(glas|ring|flasche|packung|pck\.?|dose|becher)$/.test(u)) q = shop ? up(qty, 1) : up(qty, .25);
+  else q = shop ? up(qty, 1) : up(qty, .5);   /* Stk, Stange, Zehe, Bund, Scheibe, Handvoll, ohne Einheit */
+  return fmt(q, unit);
+}
 
 /* ---------- Kalorien ----------
    Richtwerte: kcal pro 100 g (roh) und Gewicht in g für Stück-Angaben.
@@ -545,14 +558,14 @@ function vShop(){
     <div class="aisles shop">${groups.map(g => `<div class="aisle"><h3>${g.title}<span>${g.list.filter(i => !S.checked[i.key]).length} offen</span></h3><ul class="clean">${g.list.map(i => `
       <li class="${S.checked[i.key] ? "done" : ""}" data-k="${esc(i.key)}"><input type="checkbox" ${S.checked[i.key] ? "checked" : ""}>
       <span class="t">${esc(i.name)}<small>${[...new Set(i.from)].map(esc).join(", ")}</small></span>
-      <span class="amt">${i.qty ? fmt(i.qty, i.unit) : (i.unit || "")}</span></li>`).join("")}</ul></div>`).join("")}</div>`
+      <span class="amt">${i.qty ? nice(i.qty, i.unit, true) : (i.unit || "")}</span></li>`).join("")}</ul></div>`).join("")}</div>`
       : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste erscheint, sobald Gerichte im Wochenplan stehen.</div>`}`;
   document.querySelectorAll("li[data-k]").forEach(li => li.onclick = () => { S.checked[li.dataset.k] = !S.checked[li.dataset.k]; save(); render() });
   if (!items.length) return;
   $("#reset").onclick = () => { S.checked = {}; save(); render() };
   /* nur noch nicht abgehakte Zutaten weitergeben */
   const text = () => groups.map(g => [g.title, g.list.filter(i => !S.checked[i.key])]).filter(([, l]) => l.length)
-    .map(([t, l]) => t + "\n" + l.map(i => `- ${i.qty ? fmt(i.qty,i.unit)+" " : ""}${i.name}`).join("\n")).join("\n\n");
+    .map(([t, l]) => t + "\n" + l.map(i => `- ${i.qty ? nice(i.qty, i.unit, true)+" " : ""}${i.name}`).join("\n")).join("\n\n");
   const cp = $("#copy"); cp.onclick = () => navigator.clipboard.writeText(text()).then(() => cp.textContent = "Kopiert ✓");
   if ($("#share")) $("#share").onclick = () => navigator.share({title: "Einkaufsliste", text: "Einkaufsliste\n\n" + text()}).catch(() => {});
 }
@@ -601,7 +614,7 @@ function detail(id){
     <div>${(r.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
     ${kcalBox(r)}
     <h4 style="margin:16px 0 0">Zutaten <span class="mute" style="font-weight:400">für ${S.people} Person${S.people === 1 ? "" : "en"} (Rezept: ${r.portions})</span></h4>
-    <ul class="ing">${r.ingredients.map(i => `<li><b>${i.qty ? fmt(i.qty*f, i.unit) : (i.unit || "–")}</b><span>${esc(i.name)}</span></li>`).join("")}</ul>
+    <ul class="ing">${r.ingredients.map(i => `<li><b>${i.qty ? nice(i.qty*f, i.unit) : (i.unit || "–")}</b><span>${esc(i.name)}</span></li>`).join("")}</ul>
     ${r.steps ? `<h4 style="margin:18px 0 6px">Zubereitung</h4><div class="steps">${esc(r.steps)}</div>` : ""}
     <div class="row acts" style="margin-top:20px"><button class="g" id="del">Löschen</button><button class="g" id="ed">Bearbeiten</button><button class="g" id="eat">🍽️ Gegessen</button><span class="sp"></span><button class="g cl" id="cl">Schließen</button><button class="b main ${sel ? "picked" : ""}" id="pk">${sel ? "✓ Eingeplant – entfernen" : "+ In die Woche"}</button></div></div>`;
   openDlg();
