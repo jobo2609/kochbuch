@@ -309,7 +309,7 @@ for (const r of SEED) {
 }
 save();
 let tab = "recipes", filterTag = "", search = "";
-const APP_VERSION = "17";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
+const APP_VERSION = "18";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
 
 /* ---------- Hilfsfunktionen ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -660,7 +660,8 @@ function vShop(){
     <h1 class="lt">Einkaufsliste</h1>
     <p class="sub" id="ssub"></p>
     ${items.length ? `<div class="prog" id="sprog"><i></i></div>` : ""}
-    ${items.length ? `<div class="btns noprint" style="margin-top:10px"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto" aria-label="Liste kopieren">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Alle Haken entfernen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>` : ""}
+    ${items.length ? `<div class="btns noprint" style="margin-top:10px"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto" aria-label="Liste kopieren">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Alle Haken entfernen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>
+    <button class="btn gray noprint donebtn" id="done2" style="width:100%;margin-top:10px;${anyDone ? "" : "display:none"}">${ic("check")} <span>Einkauf erledigt</span></button>` : ""}
     <form class="list noprint" id="addf" style="margin-top:12px"><div class="li"><span class="addb on" style="width:28px;height:28px" aria-hidden="true">${ic("plus")}</span><input class="fi" id="addi" placeholder="Artikel hinzufügen, z. B. 2 l Milch" enterkeyhint="done" autocomplete="off" aria-label="Artikel hinzufügen"><button class="btn sm2" id="addb" style="display:none">Hinzufügen</button></div></form>
     <p class="sf noprint" id="addh"></p>
     ${items.length ? `<div class="shop">${groups.map(g => `<div class="sh"><span>${g.title}</span><span data-cnt="${g.a}"></span></div><div class="list" data-g="${g.a}">${g.list.map(i => `
@@ -669,7 +670,7 @@ function vShop(){
       <div class="swc"><span class="chk" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <span class="t"><b>${esc(i.name)}</b><small>${[...new Set(i.from)].map(esc).join(", ")}</small></span>
       <span class="hov noprint"><button class="havebtn" data-area>Bereich</button>${i.extra ? `<button class="havebtn" data-del>Löschen</button>` : `<button class="havebtn" data-have>Hab ich</button>`}</span><span class="val" aria-hidden="true">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
-      <button class="btn gray noprint" id="done" style="width:100%;margin-top:22px;${anyDone ? "" : "display:none"}">${ic("check")} Einkauf erledigt</button>
+      <button class="btn gray noprint donebtn" id="done" style="width:100%;margin-top:22px;${anyDone ? "" : "display:none"}">${ic("check")} <span>Einkauf erledigt</span></button>
       <p class="sf noprint">${anyDone ? "„Einkauf erledigt“ nimmt alles Abgehakte von der Liste. " : ""}Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über einen Eintrag" : "Wische einen Eintrag nach links"}: <b>Hab ich</b> nimmt ihn von der Liste, <b>Bereich</b> ändert die Zuordnung, eigene Artikel kannst du <b>löschen</b>.</p>`
       : all.length ? `<div class="empty"><span class="big">🏠</span>${bought ? "Alles eingekauft." : "Du hast alles zu Hause."}</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste füllt sich mit den Gerichten aus deinem Wochenplan. Eigene Artikel kannst du oben hinzufügen.</div>`}
     ${bought ? `<div class="list noprint" style="margin-top:22px"><div class="li tap" id="unbuy"><span class="t">${bought} eingekaufte Zutat${bought === 1 ? "" : "en"} ausgeblendet</span><span class="act">Anzeigen</span></div></div>` : ""}
@@ -695,7 +696,7 @@ function vShop(){
     if (li.classList.contains("open")) return closeSwipe(li);
     toggleRow(li) });
   document.querySelectorAll("[data-k]").forEach(li => li.onkeydown = e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggleRow(li) } });
-  if ($("#done")) $("#done").onclick = shoppingDone;
+  document.querySelectorAll(".donebtn").forEach(b => b.onclick = shoppingDone);
   if ($("#unbuy")) $("#unbuy").onclick = () => { S.bought = {}; save(); render() };
   document.querySelectorAll("[data-have]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); (S.have ||= {})[row.dataset.h] = true; save(); collapse(row) });
   document.querySelectorAll("[data-del]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); S.extra = (S.extra || []).filter(x => x.id !== row.dataset.x); delete S.checked[row.dataset.k]; save(); collapse(row) });
@@ -772,7 +773,7 @@ function updShop(){
   const p = $("#sprog"); if (p) { p.classList.toggle("full", all && done === all); p.firstChild.style.width = (all ? done / all * 100 : 0) + "%" }
   document.querySelectorAll("[data-g]").forEach(l => { const o = l.querySelectorAll("[data-k]:not(.done)").length; $(`[data-cnt="${l.dataset.g}"]`).textContent = o ? `${o} offen` : "✓ erledigt" });
   $("#c3").textContent = (all - done) || "";
-  const d = $("#done"); if (d) d.style.display = done ? "" : "none";
+  document.querySelectorAll(".donebtn").forEach(b => { b.style.display = done ? "" : "none"; b.querySelector("span").textContent = `Einkauf erledigt (${done} abgehakt)` });
   const h = $("#addh"); if (h && !$("#addi").value) h.textContent = "Auch Dinge, die in keinem Rezept stehen, z. B. Klopapier. Der Bereich wird automatisch erkannt.";
 }
 
