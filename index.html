@@ -16,18 +16,20 @@
 <style>
 /* ---------- iOS-Stil: Farben wie die Systemfarben von iOS ---------- */
 :root{--bg:#f2f2f7;--card:#fff;--card2:#f2f2f7;--fill:rgba(118,118,128,.12);--fill2:rgba(118,118,128,.2);--sep:rgba(60,60,67,.2);--ink:#000;--mute:rgba(60,60,67,.6);--mute2:rgba(60,60,67,.3);
-  --acc:#f06a2a;--accf:rgba(240,106,42,.13);--ok:#34c759;--red:#ff3b30;--bar:rgba(249,249,249,.86);--shadow:0 1px 3px rgba(0,0,0,.06);
+  --acc:#c2410c;--accf:rgba(194,65,12,.12);--onacc:#fff;--ok:#34c759;--red:#ff3b30;--bar:rgba(249,249,249,.86);--shadow:0 1px 3px rgba(0,0,0,.06);
   --ease:cubic-bezier(.32,.72,0,1);--r:12px}
 @media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--fill:rgba(118,118,128,.24);--fill2:rgba(118,118,128,.36);--sep:rgba(84,84,88,.6);--ink:#fff;--mute:rgba(235,235,245,.6);--mute2:rgba(235,235,245,.3);
-  --acc:#ff8040;--accf:rgba(255,128,64,.2);--ok:#30d158;--red:#ff453a;--bar:rgba(22,22,22,.8);--shadow:none}}
+  --acc:#ff8a4c;--accf:rgba(255,138,76,.2);--onacc:#000;--ok:#30d158;--red:#ff453a;--bar:rgba(22,22,22,.8);--shadow:none}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
+html{-webkit-text-size-adjust:100%;font-size:1rem}
+/* Schrift wächst mit der iPhone-Einstellung „Textgröße“ (nur auf Touch-Geräten, am Mac wäre sie sonst zu klein) */
+@supports (font:-apple-system-body){@media (hover:none) and (pointer:coarse){html{font:-apple-system-body}}}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
 button{touch-action:manipulation;font:inherit;color:inherit;-webkit-user-select:none;user-select:none}
 .wrap{max-width:720px;margin:auto;padding:0 16px}
 .sm,nav .ico{display:none}
 ul.clean{list-style:none;margin:0;padding:0}
-.mute{color:var(--mute);font-size:15px}
+.mute{color:var(--mute);font-size:0.882rem}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .sp{flex:1}
 svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -35,24 +37,24 @@ svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-widt
 /* Kopfzeile (Mac/iPad): Titel + Segment-Schalter */
 header{position:sticky;top:0;z-index:20;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
 header .wrap{display:flex;align-items:center;gap:16px;height:56px}
-.brand{font-weight:700;font-size:17px;white-space:nowrap}
+.brand{font-weight:700;font-size:1rem;white-space:nowrap}
 #tb{display:none}
 nav{display:flex;gap:2px;background:var(--fill);border-radius:9px;padding:2px;margin-left:auto}
-nav button{display:flex;align-items:center;gap:6px;border:0;background:none;border-radius:7px;padding:6px 14px;font-size:14px;font-weight:500;cursor:pointer;position:relative;transition:background .2s,box-shadow .2s}
+nav button{display:flex;align-items:center;gap:6px;border:0;background:none;border-radius:7px;padding:6px 14px;font-size:0.824rem;font-weight:500;cursor:pointer;position:relative;transition:background .2s,box-shadow .2s}
 nav button.on{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
-nav .cnt{min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:12px;font-weight:600;text-align:center;padding:0 5px}
+nav .cnt{min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:0.706rem;font-weight:600;text-align:center;padding:0 5px}
 nav .cnt:empty{display:none}
-nav .plus{order:9;margin-left:8px;background:var(--acc);color:#fff;font-weight:600}
-nav .plus .pl{font-size:18px;line-height:1}
+nav .plus{order:9;margin-left:8px;background:var(--acc);color:var(--onacc);font-weight:600}
+nav .plus .pl{font-size:1.059rem;line-height:1}
 main.wrap{padding-top:8px;padding-bottom:60px}
 @media (max-width:900px){.bt{display:none}}
 @media (min-width:701px){nav{position:fixed;top:10px;right:max(16px,calc(50vw - 344px));z-index:21}}
 
 /* Große Titel wie in iOS */
-.lt{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.01em;margin:6px 0 2px}
-.sub{color:var(--mute);font-size:15px;margin:0 0 14px}
-.sh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.02em;margin:22px 16px 7px}
-.sf{font-size:13px;color:var(--mute);margin:7px 16px 0;line-height:1.35}
+.lt{font-size:2rem;line-height:1.2;font-weight:700;letter-spacing:.01em;margin:6px 0 2px}
+.sub{color:var(--mute);font-size:0.882rem;margin:0 0 14px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;font-size:0.765rem;color:var(--mute);text-transform:uppercase;letter-spacing:.02em;margin:22px 16px 7px}
+.sf{font-size:0.765rem;color:var(--mute);margin:7px 16px 0;line-height:1.35}
 
 /* Gruppierte Listen */
 .list{background:var(--card);border-radius:var(--r);overflow:hidden}
@@ -62,43 +64,44 @@ main.wrap{padding-top:8px;padding-bottom:60px}
 .tap:active{background:var(--fill2);transition:none}
 .li .t{flex:1;min-width:0}
 .li .t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis}
-.li .t small{display:block;color:var(--mute);font-size:15px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t small{display:block;color:var(--mute);font-size:0.882rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .li .val{color:var(--mute);white-space:nowrap}
+.li .val.warn{color:var(--red);font-weight:600}
 .li .act{color:var(--acc)}
 .li .act.red{color:var(--red)}
 .chev{color:var(--mute2);flex:none}
-.cap{display:block;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--acc);margin-bottom:1px}
+.cap{display:block;font-size:0.706rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--acc);margin-bottom:1px}
 
 /* Knöpfe */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:var(--r);padding:0 18px;height:50px;font-size:17px;font-weight:600;background:var(--acc);color:#fff;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:var(--r);padding:0 18px;height:50px;font-size:1rem;font-weight:600;background:var(--acc);color:var(--onacc);cursor:pointer;transition:transform .15s,opacity .15s}
 .btn.gray{background:var(--fill);color:var(--acc)}
-.btn.sm2{height:34px;padding:0 14px;font-size:15px;border-radius:999px}
+.btn.sm2{height:34px;padding:0 14px;font-size:0.882rem;border-radius:999px}
 .btn.done{background:var(--ok)}
 .btn:active,.ibtn:active,.chip:active,nav button:active{opacity:.6;transform:scale(.97);transition:none}
 .btns{display:flex;gap:10px;margin:14px 0 0}
 .btns .btn{flex:1}
-.ibtn{width:34px;height:34px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:var(--acc);cursor:pointer;transition:transform .15s,opacity .15s}
+.ibtn{width:44px;height:44px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:var(--acc);cursor:pointer;transition:transform .15s,opacity .15s}
 .ibtn.mute{color:var(--mute2)}
 .ibtn.red{color:var(--red)}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 4px}
 
 /* Suche und Filter */
 .search{display:flex;align-items:center;gap:6px;height:36px;padding:0 8px;background:var(--fill);border-radius:10px;color:var(--mute);margin:4px 0 12px}
-.search input{flex:1;min-width:0;border:0;background:none;outline:none;font:inherit;font-size:17px;color:var(--ink);padding:0}
+.search input{flex:1;min-width:0;border:0;background:none;outline:none;font:inherit;font-size:1rem;color:var(--ink);padding:0}
 .search input::placeholder{color:var(--mute)}
 .chips{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:0;background:var(--fill);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:15px;cursor:pointer;transition:background .2s,color .2s}
-.chip.on{background:var(--acc);color:#fff;font-weight:600}
+.chip{flex:none;border:0;background:var(--fill);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:0.882rem;cursor:pointer;transition:background .2s,color .2s}
+.chip.on{background:var(--acc);color:var(--onacc);font-weight:600}
 
 /* Rezeptzeile */
-.thumb{width:56px;height:56px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:28px;overflow:hidden;position:relative;background:linear-gradient(135deg,hsl(var(--h) 75% 90%),hsl(calc(var(--h) + 25) 80% 82%))}
+.thumb{width:56px;height:56px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:1.647rem;overflow:hidden;position:relative;background:linear-gradient(135deg,hsl(var(--h) 75% 90%),hsl(calc(var(--h) + 25) 80% 82%))}
 @media (prefers-color-scheme:dark){.thumb,.hero{background:linear-gradient(135deg,hsl(var(--h) 35% 24%),hsl(calc(var(--h) + 25) 40% 17%))}}
 .thumb img,.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.thumb.s{width:44px;height:44px;border-radius:10px;font-size:23px}
+.thumb.s{width:44px;height:44px;border-radius:10px;font-size:1.353rem}
 .rl{--ins:84px}
 .addb{width:32px;height:32px;flex:none;border:0;border-radius:50%;display:grid;place-items:center;background:var(--accf);color:var(--acc);cursor:pointer;transition:background .25s,color .25s,transform .15s}
-.addb.on{background:var(--acc);color:#fff}
+.addb.on{background:var(--acc);color:var(--onacc)}
 .addb svg{width:18px;height:18px;stroke-width:2.4}
 .pop{animation:pop .4s var(--ease)}
 @keyframes pop{0%{transform:scale(.6)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
@@ -111,17 +114,19 @@ main.wrap{padding-top:8px;padding-bottom:60px}
 /* Plus/Minus wie UIStepper */
 .step{display:flex;align-items:center;gap:10px}
 .step .box{display:flex;align-items:center;background:var(--fill);border-radius:9px;height:32px}
-.step button{width:46px;height:32px;border:0;background:none;font-size:20px;cursor:pointer;color:var(--ink);border-radius:9px}
+.step button{width:46px;height:32px;border:0;background:none;font-size:1.176rem;cursor:pointer;color:var(--ink);border-radius:9px}
 .step button:active{background:var(--fill2)}
 .step button + b + button{border-left:0}
-.step b{min-width:28px;text-align:center;font-weight:600;font-size:17px}
-.step.mini .box{height:28px;border-radius:8px}.step.mini button{width:34px;height:28px;font-size:17px}.step.mini b{min-width:22px;font-size:15px}
-.pp{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--mute)}
+.step b{min-width:28px;text-align:center;font-weight:600;font-size:1rem}
+.step.mini .box{height:28px;border-radius:8px}.step.mini button{width:34px;height:28px;font-size:1rem}.step.mini b{min-width:22px;font-size:0.882rem}
+.pp{display:flex;align-items:center;gap:8px;font-size:0.765rem;color:var(--mute)}
+.wk{flex-wrap:wrap;row-gap:2px}
+.wka{flex-basis:100%;display:flex;align-items:center;gap:0;min-width:0}
 .pp span{display:flex;align-items:center;gap:4px}.pp .own{color:var(--acc);font-weight:600}
 
 /* Einkaufsliste mit runden Häkchen (wie Erinnerungen) */
 .chk{width:24px;height:24px;flex:none;border-radius:50%;border:1.5px solid var(--mute2);display:grid;place-items:center;transition:background .25s var(--ease),border-color .25s}
-.chk svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;transform:scale(0);transition:transform .3s var(--ease)}
+.chk svg{width:14px;height:14px;stroke:var(--onacc);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;transform:scale(0);transition:transform .3s var(--ease)}
 .done .chk{background:var(--acc);border-color:var(--acc)}
 .done .chk svg{transform:scale(1)}
 .shop .t b{font-weight:400;transition:color .25s}
@@ -134,38 +139,38 @@ main.wrap{padding-top:8px;padding-bottom:60px}
 .swc{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 16px;background:var(--card);position:relative;z-index:1;transition:transform .35s var(--ease),background .25s}
 .sw.tap:active .swc{background:color-mix(in srgb,var(--card),#8e8e93 16%);transition:transform .35s var(--ease)}
 .swas{position:absolute;right:0;top:0;bottom:0;display:flex}
-.swa2{width:88px;border:0;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
-.swa2.gray{background:#8e8e93}.swa2.red{background:var(--red)}
+.swa2{width:88px;border:0;background:var(--acc);color:var(--onacc);font-weight:600;font-size:0.882rem;cursor:pointer}
+.swa2.gray{background:#636366;color:#fff}.swa2.red{background:#d70015;color:#fff}
 .hov{display:none;gap:6px}
 .pop2 .swc{animation:flash 1.4s ease}
 @keyframes flash{0%,30%{background:var(--accf)}100%{background:var(--card)}}
-.havebtn{display:none;border:0;background:var(--fill);color:var(--acc);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer;opacity:0;transition:opacity .2s}
+.havebtn{display:none;border:0;background:var(--fill);color:var(--acc);border-radius:999px;padding:4px 10px;font-size:0.765rem;cursor:pointer;opacity:0;transition:opacity .2s}
 @media (hover:hover){.hov{display:inline-flex}.havebtn{display:inline-block}.sw:hover .havebtn{opacity:1}.swas{display:none}}
 
 /* Profil */
 .prof{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 0 4px}
-.ava{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:42px;background:linear-gradient(135deg,#f58a4d,#d4511c);box-shadow:var(--shadow)}
-.prof h2{margin:10px 0 2px;font-size:22px}
+.ava{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:2.471rem;background:linear-gradient(135deg,#f58a4d,#d4511c);box-shadow:var(--shadow)}
+.prof h2{margin:10px 0 2px;font-size:1.294rem}
 .stats{display:flex;gap:28px;margin-top:10px}
-.stats div{line-height:1.2}.stats b{display:block;font-size:20px}.stats span{font-size:13px;color:var(--mute)}
+.stats div{line-height:1.2}.stats b{display:block;font-size:1.176rem}.stats span{font-size:0.765rem;color:var(--mute)}
 
 /* Nährwerte */
 .kgrid{display:grid;grid-template-columns:repeat(4,1fr)}
 .kgrid div{text-align:center;padding:12px 4px;line-height:1.15}
 .kgrid div + div{border-left:.5px solid var(--sep)}
-.kgrid b{display:block;font-size:20px;font-weight:700}
-.kgrid b i{font-style:normal;font-size:13px;font-weight:600;color:var(--mute)}
-.kgrid span{font-size:12px;color:var(--mute)}
+.kgrid b{display:block;font-size:1.176rem;font-weight:700}
+.kgrid b i{font-style:normal;font-size:0.765rem;font-weight:600;color:var(--mute)}
+.kgrid span{font-size:0.706rem;color:var(--mute)}
 .kgrid .k b{color:var(--acc)}
 .nin{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
-.nin label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
-.nin input{width:100%;height:36px;border:0;border-radius:8px;background:var(--fill);padding:0 8px;font:inherit;font-size:16px;color:var(--ink)}
+.nin label{display:flex;flex-direction:column;gap:3px;font-size:0.706rem;color:var(--mute)}
+.nin input{width:100%;height:36px;border:0;border-radius:8px;background:var(--fill);padding:0 8px;font:inherit;font-size:0.941rem;color:var(--ink)}
 .nin.w5{grid-template-columns:repeat(5,1fr)}
 .nut .li{flex-wrap:wrap;gap:8px}
 .nut .t{flex-basis:100%}
 
 /* Formulare */
-.fi{width:100%;border:0;background:none;outline:none;font:inherit;font-size:17px;color:var(--ink);padding:0}
+.fi{width:100%;border:0;background:none;outline:none;font:inherit;font-size:1rem;color:var(--ink);padding:0}
 .fi::placeholder{color:var(--mute2)}
 textarea.fi{min-height:110px;resize:vertical;line-height:1.35}
 .li label.t{color:var(--ink)}
@@ -173,7 +178,7 @@ textarea.fi{min-height:110px;resize:vertical;line-height:1.35}
 
 /* Leerer Zustand */
 .empty{text-align:center;color:var(--mute);padding:56px 20px}
-.empty .big{font-size:48px;display:block;margin-bottom:10px}
+.empty .big{font-size:2.824rem;display:block;margin-bottom:10px}
 
 /* ---------- Blätter (Sheets) ---------- */
 dialog{border:0;padding:0;background:var(--bg);color:var(--ink);width:calc(100% - 32px);max-width:560px;max-height:min(88vh,900px);border-radius:14px;overflow:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.3)}
@@ -187,19 +192,19 @@ dialog.closing::backdrop{animation:fadeOut .25s ease forwards}
 @keyframes fadeOut{to{opacity:0}}
 .pad{padding:16px 16px 24px}
 .sheethd{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:56px;padding:0 16px;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
-.sheethd b{font-size:17px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
-.sheethd button{border:0;background:none;color:var(--acc);font-size:17px;padding:8px 0;cursor:pointer}
+.sheethd b{font-size:1rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.sheethd button{border:0;background:none;color:var(--acc);font-size:1rem;padding:8px 0;cursor:pointer}
 .sheethd button:last-child{justify-self:end;font-weight:600}
 .sheethd button:first-child{justify-self:start}
 .x{position:sticky;top:12px;float:right;margin:12px 12px -48px 0;z-index:4;width:30px;height:30px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(118,118,128,.24);color:var(--mute);cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .x svg{width:12px;height:12px;stroke-width:3}
-.hero{height:200px;display:grid;place-items:center;font-size:76px;position:relative;background:linear-gradient(135deg,hsl(var(--h) 75% 90%),hsl(calc(var(--h) + 25) 80% 82%))}
-.dt{font-size:28px;line-height:34px;font-weight:700;margin:0 0 8px}
-.tag{display:inline-block;background:var(--fill);color:var(--mute);border-radius:999px;padding:3px 10px;font-size:13px;margin:0 4px 4px 0}
+.hero{height:200px;display:grid;place-items:center;font-size:4.471rem;position:relative;background:linear-gradient(135deg,hsl(var(--h) 75% 90%),hsl(calc(var(--h) + 25) 80% 82%))}
+.dt{font-size:1.647rem;line-height:34px;font-weight:700;margin:0 0 8px}
+.tag{display:inline-block;background:var(--fill);color:var(--mute);border-radius:999px;padding:3px 10px;font-size:0.765rem;margin:0 4px 4px 0}
 .ing .li{--ins:16px}
 .ing .q{min-width:84px;font-weight:600}
 .steps{white-space:pre-wrap;line-height:1.45;padding:14px 16px}
-.note{background:var(--fill);border-radius:10px;padding:10px 12px;margin:12px 0;font-size:15px}
+.note{background:var(--fill);border-radius:10px;padding:10px 12px;margin:12px 0;font-size:0.882rem}
 
 /* Ansichtswechsel */
 .vin{animation:viewIn .32s var(--ease)}
@@ -213,19 +218,19 @@ dialog.closing::backdrop{animation:fadeOut .25s ease forwards}
   header{position:fixed;left:0;right:0;top:0;height:44px;background:transparent;border-bottom:.5px solid transparent;-webkit-backdrop-filter:none;backdrop-filter:none;transition:background .25s,border-color .25s}
   header .wrap{height:44px;justify-content:center}
   .brand{display:none}
-  #tb{display:block;font-size:17px;font-weight:600;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
+  #tb{display:block;font-size:1rem;font-weight:600;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
   body.scrolled header{background:var(--bar);border-bottom-color:var(--sep);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
   body.scrolled #tb{opacity:1;transform:none}
   main.wrap{padding-top:44px;padding-bottom:calc(max(var(--navh, 90px), 90px) + env(safe-area-inset-bottom) + 40px)}
   /* Tableiste unten mit Milchglas */
   nav{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;gap:0;border-radius:0;padding:6px 4px calc(4px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
-  nav button{flex:1;flex-direction:column;gap:3px;padding:2px 0;border-radius:0;font-size:10px;font-weight:500;color:var(--mute);background:none!important;box-shadow:none!important}
+  nav button{flex:1;flex-direction:column;gap:3px;padding:2px 0;border-radius:0;font-size:0.588rem;font-weight:500;color:var(--mute);background:none!important;box-shadow:none!important}
   nav button.on{color:var(--acc)}
   nav .ico{display:block;width:27px;height:27px}
   nav button.on .ico path,nav button.on .ico rect,nav button.on .ico circle{fill:currentColor;fill-opacity:.18}
-  nav .cnt{position:absolute;top:-2px;left:calc(50% + 6px);font-size:12px}
-  nav .plus{order:0;margin:0;color:#fff;justify-content:center}
-  nav .plus .pl{width:52px;height:36px;border-radius:12px;background:var(--acc);display:grid;place-items:center;font-size:28px;font-weight:300;box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 45%,transparent);transition:transform .2s var(--ease)}
+  nav .cnt{position:absolute;top:-2px;left:calc(50% + 6px);font-size:0.706rem}
+  nav .plus{order:0;margin:0;color:var(--onacc);justify-content:center}
+  nav .plus .pl{width:52px;height:36px;border-radius:12px;background:var(--acc);display:grid;place-items:center;font-size:1.647rem;font-weight:300;box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 45%,transparent);transition:transform .2s var(--ease)}
   nav .plus:active .pl{transform:scale(.9)}
   /* Blätter kommen von unten */
   dialog{width:100%;max-width:none;max-height:calc(100dvh - 44px);margin:auto 0 0;border-radius:14px 14px 0 0;box-shadow:none}
@@ -249,7 +254,7 @@ dialog.closing::backdrop{animation:fadeOut .25s ease forwards}
     <button data-tab="plan"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 15l2.2 2.2L15.5 13"/></svg><span class="lg">Wochenplan</span><span class="sm">Woche</span></button>
     <button class="plus" id="add" aria-label="Neues Rezept"><span class="pl">+</span><span class="lg">Neues Rezept</span></button>
     <button data-tab="shop"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3.5h2.6l2.3 11.2a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.2l1.6-6.8H6.2"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17.5" cy="20" r="1.4"/></svg><span class="lg">Einkaufsliste</span><span class="sm">Einkauf</span> <span class="cnt" id="c3"></span></button>
-    <button data-tab="me"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Profil</button>
+    <button data-tab="me"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Profil <span class="cnt" id="c4" aria-label="Sicherung empfohlen"></span></button>
   </nav>
 
 <main id="view" class="wrap"></main>
@@ -280,7 +285,11 @@ const UNITS = {g:["g",1],kg:["g",1000],ml:["ml",1],l:["ml",1000],cl:["ml",10]};
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,9);
 const load = (k,d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d } catch { return d } };
-const save = () => { try { localStorage.setItem("kb2", JSON.stringify(S)) } catch {} };
+/* Speichern; ist der Speicher voll, gibt es eine deutliche Warnung statt still nichts zu tun */
+let warnT = 0;
+const save = () => { try { localStorage.setItem("kb2", JSON.stringify(S)); return true } catch {
+  if (Date.now() - warnT > 15000) { warnT = Date.now(); alert("Achtung: Der Speicher ist voll. Die letzte Änderung konnte nicht gespeichert werden.\n\nLösche nicht benötigte Rezepte oder Fotos und sichere deine Daten unter Profil → Backup.") }
+  return false } };
 
 let S = load("kb2", null) || {
   recipes: SEED.map(r => ({...r, id: uid(), ingredients: r.ingredients.map(([name,qty,unit]) => ({name,qty,unit}))})),
@@ -300,7 +309,7 @@ for (const r of SEED) {
 }
 save();
 let tab = "recipes", filterTag = "", search = "";
-const APP_VERSION = "16";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
+const APP_VERSION = "17";   /* bei jeder Änderung zusammen mit VERSION in sw.js erhöhen */
 
 /* ---------- Hilfsfunktionen ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -312,20 +321,33 @@ function fmt(qty, unit){
   qty = Math.round(qty * 100) / 100;
   return (qty ? String(qty).replace(".", ",") : "") + (unit ? " " + unit : "");
 }
-/* "200 g Nudeln" / "1/2 Zwiebel" / "Salz" -> Objekt */
+/* "200 g Nudeln", "500 Gramm Hack", "2-3 Karotten", "1 1/2 TL Salz", "½ Zwiebel", "Salz" -> Objekt */
+const FRAC = {"½": .5, "¼": .25, "¾": .75, "⅓": 1/3, "⅔": 2/3, "⅛": .125};
+const UNIT_WORDS = [
+  [/^(g|gr|gramm)$/, "g"], [/^(kg|kilo|kilogramm)$/, "kg"], [/^(ml|milliliter)$/, "ml"], [/^(l|liter)$/, "l"], [/^(cl|zentiliter)$/, "cl"],
+  [/^(el|essl|esslöffel)$/, "EL"], [/^(tl|teel|teelöffel)$/, "TL"], [/^(stk|st|stück|stücke)$/, "Stk"], [/^(prise|prisen|msp|messerspitze)$/, "Prise"],
+  [/^(dose|dosen)$/, "Dose"], [/^(pck|pkg|päckchen|packung|packungen)$/, "Packung"], [/^(bund|bünde)$/, "Bund"], [/^(zehe|zehen)$/, "Zehe"],
+  [/^(scheibe|scheiben)$/, "Scheibe"], [/^(becher)$/, "Becher"], [/^(glas|gläser)$/, "Glas"], [/^(ring|ringe)$/, "Ring"], [/^(flasche|flaschen)$/, "Flasche"],
+  [/^(handvoll)$/, "Handvoll"], [/^(stange|stangen)$/, "Stange"], [/^(beutel)$/, "Beutel"], [/^(kopf|köpfe)$/, "Kopf"], [/^(tasse|tassen)$/, "Tasse"]
+];
+const unitWord = w => { w = w.toLowerCase().replace(/\.$/, ""); const hit = UNIT_WORDS.find(([re]) => re.test(w)); return hit ? hit[1] : null };
+/* eine Zahl wie "2", "1,5", "1/2", "1 1/2", "1½", "½" */
+const qnum = t => { t = t.trim(); let v = 0;
+  for (const part of t.split(/\s+/)) { const fr = part.match(/^(\d*)([½¼¾⅓⅔⅛])$/);
+    v += fr ? (+fr[1] || 0) + FRAC[fr[2]] : part.includes("/") ? (([a, b]) => a / b)(part.split("/").map(Number)) : parseFloat(part.replace(",", ".")) }
+  return v };
 function parseLine(line){
-  line = line.trim(); if (!line) return null;
-  const m = line.match(/^([\d.,\/]+)\s*([A-Za-zäöüÄÖÜ.]+)?\s+(.+)$/) || line.match(/^([\d.,\/]+)\s*()(.+)$/);
-  if (!m) return {name: line, qty: 0, unit: ""};
-  let [, q, u, name] = m; u = u || "";
-  const known = /^(g|kg|ml|l|cl|el|tl|stk|stk\.|dose|dosen|pck|pck\.|packung|packungen|bund|prise|zehe|zehen|scheibe|scheiben|becher|glas|gläser|ring|flasche|flaschen|handvoll|stange|stangen|beutel|kopf|köpfe)$/i;
-  if (u && !known.test(u)) { name = u + " " + name; u = "" }
-  const l = u.toLowerCase();
-  if (l === "el" || l === "tl") u = l.toUpperCase();
-  else if (/^stk/.test(l)) u = "Stk";
-  else if (UNITS[l]) u = l;
-  else u = {scheiben: "Scheibe", zehen: "Zehe", dosen: "Dose", flaschen: "Flasche", stangen: "Stange", packungen: "Packung", "gläser": "Glas", "köpfe": "Kopf", "pck.": "Pck"}[l] || cap(l);
-  return {name: name.trim(), qty: num(q), unit: u};
+  line = line.trim().replace(/^(ca\.?|circa|etwa|ungefähr)\s+/i, ""); if (!line) return null;
+  const NUM = "(?:\\d*[½¼¾⅓⅔⅛]|\\d+\\/\\d+|\\d+(?:[.,]\\d+)?(?:\\s+\\d+\\/\\d+)?)";
+  const m = line.match(new RegExp(`^(${NUM})(?:\\s*(?:-|–|bis)\\s*(${NUM}))?\\s*(.*)$`));
+  if (!m || !m[3]) return {name: line, qty: 0, unit: ""};
+  /* bei "2-3" die größere Zahl nehmen, damit genug eingekauft wird */
+  const qty = Math.max(qnum(m[1]), m[2] ? qnum(m[2]) : 0);
+  let rest = m[3].trim(), unit = "";
+  const w = rest.match(/^([A-Za-zäöüÄÖÜß]+\.?)\s+(.+)$/);
+  if (w && unitWord(w[1])) { unit = unitWord(w[1]); rest = w[2] }
+  else { const glued = rest.match(/^(g|kg|ml|l|el|tl)\b\.?\s*(.+)$/i); if (glued) { unit = unitWord(glued[1]); rest = glued[2] } }
+  return {name: rest.trim(), qty, unit};
 }
 const ingText = i => (i.qty ? fmt(i.qty, i.unit) + " " : "") + i.name;
 /* Mengen zum Kochen und Einkaufen sinnvoll aufrunden (die gespeicherten Rezepte bleiben exakt).
@@ -425,24 +447,30 @@ function randomize(){
   while (picked.length < need && pool.length) picked.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
   // zu wenige Rezepte: wiederholen erlaubt, aber erst nachdem alle einmal dran waren
   while (picked.length < need && S.recipes.length) picked.push(S.recipes[Math.floor(Math.random()*S.recipes.length)].id);
-  S.plan = [...keep, ...picked]; S.checked = {}; save();
+  S.plan = [...keep, ...picked]; newWeek(); save();
 }
+/* neue Woche (Würfeln/Leeren): „Hab ich“ und ausgeblendete Einkäufe gelten nicht mehr */
+function newWeek(){ S.have = {}; S.bought = {} }
 /* Personen je Gericht: eigene Zahl fürs Gericht, sonst die allgemeine Einstellung */
 const servOf = id => (S.servings || {})[id] ?? S.people;
 function togglePlan(id){
   if (S.plan.includes(id)) { S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id); if (S.servings) delete S.servings[id] }
   else S.plan.push(id);
-  S.checked = {}; save();
+  save();
 }
+/* gleiche Zutat erkennen: "Zwiebeln", "Zwiebel", "Zwiebel (klein)" -> "zwiebel" */
+const PLURAL = {"äpfel": "apfel", "nüsse": "nuss", "eier": "ei", "möhren": "möhre"};
+const sing = w => PLURAL[w] || (w.length < 5 || /(chen|lein)$/.test(w) ? w : /(eln|ern)$/.test(w) ? w.slice(0, -1) : /en$/.test(w) && !/(ien|aen)$/.test(w) ? w.slice(0, -1) : /(as|os|ons)$/.test(w) ? w.slice(0, -1) : w);
+const normName = n => n.toLowerCase().replace(/\(.*?\)/g, " ").replace(/\s+/g, " ").trim().split(" ").map(sing).join(" ");
 function shopping(){
   const map = {};
   for (const id of S.plan) {
     const r = byId(id); if (!r) continue;
     const f = servOf(id) / (r.portions || 1);
     for (const i of r.ingredients) {
-      let qty = (i.qty || 0) * f, unit = i.unit || "";
+      let qty = (i.qty || 0) * f, unit = i.unit || (i.qty ? "Stk" : "");
       const u = UNITS[unit.toLowerCase()]; if (u) { qty *= u[1]; unit = u[0] }
-      const key = i.name.trim().toLowerCase() + "|" + unit;
+      const key = normName(i.name) + "|" + unit;
       (map[key] ||= {name: i.name.trim(), unit, qty: 0, from: []});
       map[key].qty += qty; map[key].from.push(r.name);
     }
@@ -476,8 +504,9 @@ let lastTab = null, popped = null;
 
 function render(){
   document.querySelectorAll("nav [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  const open = shopItems().filter(i => !S.checked[i.key]).length;
+  const open = shopItems().filter(i => !isDone(i)).length;
   $("#c3").textContent = open || "";
+  $("#c4").textContent = backupDue() ? "!" : "";
   $("#tb").textContent = TITLES[tab];
   ({recipes: vRecipes, plan: vPlan, shop: vShop, me: vMe})[tab]();
   /* sanfter Übergang nur beim Wechsel des Tabs */
@@ -485,8 +514,9 @@ function render(){
   popped = null;
 }
 /* Plus/Minus-Regler (wie UIStepper) für Kochtage und Personen */
-const stepper = (k, mini) => { const v = k.startsWith("sv:") ? servOf(k.slice(3)) : S[k];
-  return `<div class="step ${mini ? "mini" : ""}"><div class="box"><button data-set="${k}" data-d="-1" aria-label="weniger">−</button><b>${v}</b><button data-set="${k}" data-d="1" aria-label="mehr">+</button></div></div>` };
+const STEP_LAB = {days: "Kochtage", people: "Personen"};
+const stepper = (k, mini, what) => { const v = k.startsWith("sv:") ? servOf(k.slice(3)) : S[k], lab = STEP_LAB[k] || `Personen für ${what || "dieses Gericht"}`;
+  return `<div class="step ${mini ? "mini" : ""}" role="group" aria-label="${lab}"><div class="box"><button data-set="${k}" data-d="-1" aria-label="${lab}: weniger">−</button><b aria-live="polite">${v}</b><button data-set="${k}" data-d="1" aria-label="${lab}: mehr">+</button></div></div>` };
 
 /* Symbol + Farbton je Gericht, abgeleitet aus Kategorien und Name */
 const LOOKS = [[/suppe/,"🍲",28],[/pasta|spaghetti|nudel/,"🍝",12],[/salat/,"🥗",110],[/bowl/,"🥙",40],[/hähnchen|chicken/,"🍗",35],[/reis/,"🍚",190],[/auflauf|pie/,"🥘",20],[/hack/,"🥩",0],[/sauce|brokkoli/,"🥦",130],[/spinat|vegetarisch/,"🥬",140],[/süß|pfannkuchen/,"🥞",45]];
@@ -495,8 +525,33 @@ function look(r){
   const l = LOOKS.find(([re]) => re.test(s));
   return l ? {em: l[1], h: l[2]} : {em: "🍽️", h: 30};
 }
-const thumb = (r, cls = "") => { const l = look(r); return `<div class="thumb ${cls}" style="--h:${l.h}">${r.img ? `<img src="${r.img}" alt="">` : l.em}</div>` };
-const hero = r => { const l = look(r); return `<div class="hero" style="--h:${l.h}">${r.img ? `<img src="${r.img}" alt="">` : l.em}</div>` };
+/* Fotos liegen in IndexedDB (viel mehr Platz als der normale Browser-Speicher); r.img = "idb" */
+const imgs = {};
+const imgOf = r => !r.img ? "" : r.img.startsWith("data:") ? r.img : imgs[r.id] || "";
+let dbP = null;
+const idb = (mode, fn) => (dbP ||= new Promise((ok, no) => { const q = indexedDB.open("kochbuch", 1); q.onupgradeneeded = () => q.result.createObjectStore("img"); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error) }))
+  .then(db => new Promise((ok, no) => { const t = db.transaction("img", mode), q = fn(t.objectStore("img")); t.oncomplete = () => ok(q && q.result); t.onerror = () => no(t.error) }));
+/* Fotos, die noch im normalen Speicher liegen (alte Rezepte, Backups), nach IndexedDB umziehen */
+async function moveImages(){
+  let moved = false;
+  for (const r of S.recipes) if (r.img && r.img.startsWith("data:")) {
+    try { await idb("readwrite", st => st.put(r.img, r.id)); imgs[r.id] = r.img; r.img = "idb"; moved = true } catch { break }
+  }
+  return moved;
+}
+async function initImages(){
+  try {
+    const moved = await moveImages();
+    const [vals, keys] = await Promise.all([idb("readonly", st => st.getAll()), idb("readonly", st => st.getAllKeys())]);
+    keys.forEach((k, i) => { if (k !== "__vorher") imgs[k] = vals[i] });
+    if (moved) save();
+    render();
+  } catch { /* ohne IndexedDB bleiben Fotos im normalen Speicher */ }
+}
+/* Daten mit Fotos (für Backup und Übertragen) */
+const fullData = () => ({...S, recipes: S.recipes.map(r => r.img === "idb" ? {...r, img: imgs[r.id] || ""} : r)});
+const thumb = (r, cls = "") => { const l = look(r), src = imgOf(r); return `<div class="thumb ${cls}" style="--h:${l.h}">${src ? `<img src="${src}" alt="">` : l.em}</div>` };
+const hero = r => { const l = look(r), src = imgOf(r); return `<div class="hero" style="--h:${l.h}">${src ? `<img src="${src}" alt="">` : l.em}</div>` };
 
 function vRecipes(){
   const tags = [...new Set(S.recipes.flatMap(r => r.tags || []))].sort((a,b) => a.localeCompare(b, "de"));
@@ -536,24 +591,28 @@ function vPlan(){
     <div class="btns noprint"><button class="btn" id="roll">${ic("shuffle")} Zufällig würfeln</button><button class="btn gray" id="clear" style="flex:0 0 auto">Leeren</button></div>
     <div class="sh"><span>Gerichte</span></div>
     <div class="list rl" style="--ins:72px">${items.map((r,i) => { const lk = S.locked.includes(r.id), k = kcalTxt(r).replace("🔥 ", ""); return `
-      <div class="li">
+      <div class="li wk">
         <div class="tap" data-open="${r.id}">${thumb(r, "s")}</div>
-        <div class="t tap" data-open="${r.id}"><span class="cap">Gericht ${i+1}${lk ? " · fixiert" : ""}${i >= S.days ? " · extra" : ""}</span><b>${esc(r.name)}</b><small>${r.ingredients.length} Zutaten${k ? " · " + k + " pro Portion" : ""}</small><div class="pp noprint"><span class="${servOf(r.id) !== S.people ? "own" : ""}">${ICONP} Personen</span>${stepper("sv:" + r.id, true)}</div></div>
-        <button class="ibtn ${lk ? "" : "mute"} noprint" data-lock="${r.id}" aria-label="${lk ? "Fixierung lösen" : "Fixieren"}">${ic(lk ? "lock" : "unlock")}</button>
-        <button class="ibtn noprint" data-reroll="${r.id}" aria-label="Neu würfeln">${ic("shuffle")}</button>
-        <button class="ibtn red noprint" data-pick="${r.id}" aria-label="Entfernen">${ic("minus")}</button>
+        <div class="t tap" data-open="${r.id}"><span class="cap">Gericht ${i+1}${lk ? " · fixiert" : ""}${i >= S.days ? " · extra" : ""}</span><b>${esc(r.name)}</b><small>${r.ingredients.length} Zutaten${k ? " · " + k + " pro Portion" : ""}</small></div>
+        <div class="wka noprint">
+          <div class="pp"><span class="${servOf(r.id) !== S.people ? "own" : ""}">${ICONP} Personen</span>${stepper("sv:" + r.id, true, esc(r.name))}</div>
+          <span class="sp"></span>
+          <button class="ibtn ${lk ? "" : "mute"}" data-lock="${r.id}" aria-label="${lk ? "Fixierung lösen" : "Fixieren"}: ${esc(r.name)}" aria-pressed="${lk}">${ic(lk ? "lock" : "unlock")}</button>
+          <button class="ibtn" data-reroll="${r.id}" aria-label="Neu würfeln: ${esc(r.name)}">${ic("shuffle")}</button>
+          <button class="ibtn red" data-pick="${r.id}" aria-label="Aus der Woche entfernen: ${esc(r.name)}">${ic("minus")}</button>
+        </div>
       </div>`}).join("")}
       ${Array.from({length: empty}, (_, i) => `<div class="li tap noprint" data-go><div class="thumb s" style="background:var(--accf);color:var(--acc)">${ic("plus")}</div><div class="t"><span class="cap" style="color:var(--mute)">Gericht ${n+i+1}</span><b style="color:var(--acc);font-weight:400">Rezept auswählen</b></div>${ic("chev", "chev")}</div>`).join("")}
     </div>
     <p class="sf noprint">Fixierte Gerichte (Schloss) bleiben beim Würfeln erhalten, der Rest wird neu gezogen.</p>`;
   $("#roll").onclick = () => { if (!S.recipes.length) return alert("Erst Rezepte anlegen."); randomize(); render() };
-  $("#clear").onclick = () => { if (!n || confirm("Wochenplan leeren?")) { S.plan = []; S.locked = []; S.checked = {}; save(); render() } };
+  $("#clear").onclick = () => { if (!n || confirm("Wochenplan leeren? „Hab ich“ in der Einkaufsliste wird dabei zurückgesetzt, eigene Artikel bleiben.")) { S.plan = []; S.locked = []; newWeek(); save(); render() } };
   document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { tab = "recipes"; scrollTo(0, 0); render() });
   document.querySelectorAll("[data-lock]").forEach(b => b.onclick = () => { const id = b.dataset.lock; S.locked = S.locked.includes(id) ? S.locked.filter(x => x!==id) : [...S.locked, id]; save(); render() });
   document.querySelectorAll("[data-reroll]").forEach(b => b.onclick = () => {
     const id = b.dataset.reroll, pool = S.recipes.map(r => r.id).filter(x => !S.plan.includes(x));
     if (!pool.length) return alert("Keine weiteren Rezepte zum Tauschen vorhanden.");
-    S.plan[S.plan.indexOf(id)] = pool[Math.floor(Math.random()*pool.length)]; S.locked = S.locked.filter(x => x!==id); S.checked = {}; save(); render() });
+    S.plan[S.plan.indexOf(id)] = pool[Math.floor(Math.random()*pool.length)]; S.locked = S.locked.filter(x => x!==id); save(); render() });
   document.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { togglePlan(b.dataset.pick); render() });
   document.querySelectorAll("[data-open]").forEach(b => b.onclick = e => { if (!e.target.closest(".pp")) detail(b.dataset.open) });
 }
@@ -580,45 +639,52 @@ const aisleOf = name => { const n = name.toLowerCase().trim(), o = (S.aisleOv ||
   const i = AISLES.findIndex(([, re]) => re.test(n)); return i < 0 ? OTHER : i };
 
 /* „Hab ich schon zu Hause“: gilt je Zutat (unabhängig von Menge/Einheit) und bleibt gespeichert */
-const hkey = i => i.name.trim().toLowerCase();
+const hkey = i => normName(i.name);
+/* abgehakt gilt nur, solange nicht mehr gebraucht wird als beim Abhaken (z. B. wenn ein Gericht dazukommt) */
+const isDone = i => !!S.checked[i.key] && (i.extra || (S.checkedQ || {})[i.key] == null || i.qty <= S.checkedQ[i.key] + 1e-6);
+const isBought = i => !i.extra && (S.bought || {})[i.key] != null && i.qty <= S.bought[i.key] + 1e-6;
 /* alles, was auf der Liste steht: Zutaten der Woche (ohne „zu Hause“) + eigene Artikel */
 function shopItems(){
   const have = S.have || {};
-  const fromPlan = shopping().filter(i => !have[hkey(i)]);
+  const fromPlan = shopping().filter(i => !have[hkey(i)] && !isBought(i));
   const extra = (S.extra || []).map(x => ({key: "x:" + x.id, name: x.name, qty: x.qty, unit: x.unit, from: ["Eigener Eintrag"], extra: x.id}));
   return [...fromPlan, ...extra];
 }
 function vShop(){
   const all = shopping(), have = S.have || {}, items = shopItems(), home = all.filter(i => have[hkey(i)]);
+  const bought = all.filter(i => !have[hkey(i)] && isBought(i)).length;
   const groups = AISLE_ORDER.map(a => ({a, title: aisleName(a), list: items.filter(i => aisleOf(i.name) === a)})).filter(g => g.list.length);
   const amount = i => i.qty ? nice(i.qty, i.unit, true) : (i.unit || "");
+  const anyDone = items.some(isDone);
   $("#view").innerHTML = `
     <h1 class="lt">Einkaufsliste</h1>
     <p class="sub" id="ssub"></p>
     ${items.length ? `<div class="prog" id="sprog"><i></i></div>` : ""}
-    ${items.length ? `<div class="btns noprint"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Haken zurücksetzen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>
-    <p class="sf noprint">Teilen geht z.&nbsp;B. per WhatsApp oder Nachrichten. Geteilt wird nur, was noch nicht abgehakt ist.</p>` : ""}
-    <form class="list noprint" id="addf" style="margin-top:14px"><div class="li"><span class="addb on" style="width:28px;height:28px">${ic("plus")}</span><input class="fi" id="addi" placeholder="Artikel hinzufügen, z. B. 2 l Milch" enterkeyhint="done" autocomplete="off"><button class="btn sm2" id="addb" style="display:none">Hinzufügen</button></div></form>
-    <p class="sf noprint" id="addh">Auch Dinge, die in keinem Rezept stehen, z.&nbsp;B. Klopapier. Der Bereich wird automatisch erkannt.</p>
-    <div class="list noprint" style="margin-top:14px"><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
-    <p class="sf noprint">Die Mengen passen sich automatisch an. Für einzelne Gerichte (z.&nbsp;B. wenn Gäste kommen) stellst du die Personen in der <a href="#" data-gotab="plan" style="color:var(--acc)">Woche</a> ein.</p>
+    ${items.length ? `<div class="btns noprint" style="margin-top:10px"><button class="btn" id="share">${ic("share")} Liste teilen</button><button class="btn gray" id="copy" style="flex:0 0 auto" aria-label="Liste kopieren">${ic("copy")}</button><button class="btn gray" id="reset" style="flex:0 0 auto" aria-label="Alle Haken entfernen">${ic("reset")}</button><button class="btn gray desk" style="flex:0 0 auto" onclick="print()" aria-label="Drucken">${ic("print")}</button></div>` : ""}
+    <form class="list noprint" id="addf" style="margin-top:12px"><div class="li"><span class="addb on" style="width:28px;height:28px" aria-hidden="true">${ic("plus")}</span><input class="fi" id="addi" placeholder="Artikel hinzufügen, z. B. 2 l Milch" enterkeyhint="done" autocomplete="off" aria-label="Artikel hinzufügen"><button class="btn sm2" id="addb" style="display:none">Hinzufügen</button></div></form>
+    <p class="sf noprint" id="addh"></p>
     ${items.length ? `<div class="shop">${groups.map(g => `<div class="sh"><span>${g.title}</span><span data-cnt="${g.a}"></span></div><div class="list" data-g="${g.a}">${g.list.map(i => `
-      <div class="li tap sw ${S.checked[i.key] ? "done" : ""} ${i.extra && i.extra === justAdded ? "pop2" : ""}" data-k="${esc(i.key)}" data-h="${esc(hkey(i))}" data-n="${esc(i.name)}" ${i.extra ? `data-x="${i.extra}"` : ""}>
+      <div class="li tap sw ${isDone(i) ? "done" : ""} ${i.extra && i.extra === justAdded ? "pop2" : ""}" data-k="${esc(i.key)}" data-q="${i.qty || 0}" data-h="${esc(hkey(i))}" data-n="${esc(i.name)}" ${i.extra ? `data-x="${i.extra}"` : ""} role="checkbox" tabindex="0" aria-checked="${isDone(i)}" aria-label="${esc(i.name)} ${esc(amount(i))}">
       <div class="swas noprint"><button class="swa2 gray" data-area>Bereich</button>${i.extra ? `<button class="swa2 red" data-del>Löschen</button>` : `<button class="swa2" data-have>Hab ich</button>`}</div>
-      <div class="swc"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <div class="swc"><span class="chk" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <span class="t"><b>${esc(i.name)}</b><small>${[...new Set(i.from)].map(esc).join(", ")}</small></span>
-      <span class="hov noprint"><button class="havebtn" data-area>Bereich</button>${i.extra ? `<button class="havebtn" data-del>Löschen</button>` : `<button class="havebtn" data-have>Hab ich</button>`}</span><span class="val">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
-      <p class="sf noprint">Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über einen Eintrag" : "Wische einen Eintrag nach links"}: <b>Hab ich</b> nimmt ihn von der Liste, <b>Bereich</b> ändert die Zuordnung, eigene Artikel kannst du <b>löschen</b>.</p>`
-      : all.length ? `<div class="empty"><span class="big">🏠</span>Du hast alles zu Hause.</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste füllt sich mit den Gerichten aus deinem Wochenplan. Eigene Artikel kannst du oben hinzufügen.</div>`}
+      <span class="hov noprint"><button class="havebtn" data-area>Bereich</button>${i.extra ? `<button class="havebtn" data-del>Löschen</button>` : `<button class="havebtn" data-have>Hab ich</button>`}</span><span class="val" aria-hidden="true">${amount(i)}</span></div></div>`).join("")}</div>`).join("")}</div>
+      <button class="btn gray noprint" id="done" style="width:100%;margin-top:22px;${anyDone ? "" : "display:none"}">${ic("check")} Einkauf erledigt</button>
+      <p class="sf noprint">${anyDone ? "„Einkauf erledigt“ nimmt alles Abgehakte von der Liste. " : ""}Tipp: ${matchMedia("(hover:hover)").matches ? "Fahre mit der Maus über einen Eintrag" : "Wische einen Eintrag nach links"}: <b>Hab ich</b> nimmt ihn von der Liste, <b>Bereich</b> ändert die Zuordnung, eigene Artikel kannst du <b>löschen</b>.</p>`
+      : all.length ? `<div class="empty"><span class="big">🏠</span>${bought ? "Alles eingekauft." : "Du hast alles zu Hause."}</div>` : `<div class="empty"><span class="big">🛒</span>Die Einkaufsliste füllt sich mit den Gerichten aus deinem Wochenplan. Eigene Artikel kannst du oben hinzufügen.</div>`}
+    ${bought ? `<div class="list noprint" style="margin-top:22px"><div class="li tap" id="unbuy"><span class="t">${bought} eingekaufte Zutat${bought === 1 ? "" : "en"} ausgeblendet</span><span class="act">Anzeigen</span></div></div>` : ""}
     ${home.length ? `<div class="sh noprint"><span>Schon zu Hause</span><span>${home.length}</span></div>
-    <div class="list noprint">${home.map(i => `<div class="li"><span class="t" style="color:var(--mute)">${esc(i.name)}</span><span class="val">${amount(i)}</span><button class="btn gray sm2" data-back="${esc(hkey(i))}">Zurück</button></div>`).join("")}</div>
-    <p class="sf noprint">Diese Zutaten stehen nicht auf der Einkaufsliste und werden nicht geteilt. Mit <b>Zurück</b> holst du sie wieder auf die Liste.</p>` : ""}`;
+    <div class="list noprint">${home.map(i => `<div class="li"><span class="t" style="color:var(--mute)">${esc(i.name)}</span><span class="val">${amount(i)}</span><button class="btn gray sm2" data-back="${esc(hkey(i))}" aria-label="${esc(i.name)} zurück auf die Liste">Zurück</button></div>`).join("")}</div>
+    <p class="sf noprint">Diese Zutaten stehen nicht auf der Einkaufsliste und werden nicht geteilt. Mit <b>Zurück</b> holst du sie wieder auf die Liste. Beim Würfeln oder Leeren der Woche wird das zurückgesetzt.</p>` : ""}
+    <div class="sh noprint"><span>Mengen</span></div>
+    <div class="list noprint"><div class="li"><span class="t">Personen<small>für alle Gerichte</small></span>${stepper("people")}</div></div>
+    <p class="sf noprint">Die Mengen passen sich automatisch an. Für einzelne Gerichte (z.&nbsp;B. wenn Gäste kommen) stellst du die Personen in der <a href="#" data-gotab="plan" style="color:var(--acc)">Woche</a> ein. Teilen geht z.&nbsp;B. per WhatsApp; geteilt wird nur, was noch nicht abgehakt ist.</p>`;
   justAdded = null;
   updShop();
   /* eigenen Artikel hinzufügen: Menge und Einheit werden wie im Rezept erkannt */
   const inp = $("#addi");
   inp.oninput = () => { $("#addb").style.display = inp.value.trim() ? "" : "none";
-    const p = parseLine(inp.value); $("#addh").textContent = p ? `Kommt in: ${aisleName(aisleOf(p.name))}` : "Auch Dinge, die in keinem Rezept stehen, z. B. Klopapier. Der Bereich wird automatisch erkannt." };
+    const p = parseLine(inp.value); $("#addh").textContent = p && inp.value.trim() ? `Kommt in: ${aisleName(aisleOf(p.name))}` : "Auch Dinge, die in keinem Rezept stehen, z. B. Klopapier. Der Bereich wird automatisch erkannt." };
   $("#addf").onsubmit = ev => { ev.preventDefault(); const p = parseLine(inp.value); if (!p) return;
     const id = uid(); (S.extra ||= []).push({id, name: p.name, qty: p.qty || 0, unit: p.unit || ""}); save(); justAdded = id; render();
     setTimeout(() => { const f = $("#addi"); if (f) f.focus() }, 50) };
@@ -627,15 +693,18 @@ function vShop(){
   document.querySelectorAll("[data-k]").forEach(li => li.onclick = e => {
     if (li._swiped || e.target.closest("[data-have],[data-del],[data-area]")) return;
     if (li.classList.contains("open")) return closeSwipe(li);
-    const k = li.dataset.k; S.checked[k] = !S.checked[k]; save(); li.classList.toggle("done", !!S.checked[k]); updShop() });
+    toggleRow(li) });
+  document.querySelectorAll("[data-k]").forEach(li => li.onkeydown = e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggleRow(li) } });
+  if ($("#done")) $("#done").onclick = shoppingDone;
+  if ($("#unbuy")) $("#unbuy").onclick = () => { S.bought = {}; save(); render() };
   document.querySelectorAll("[data-have]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); (S.have ||= {})[row.dataset.h] = true; save(); collapse(row) });
   document.querySelectorAll("[data-del]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); S.extra = (S.extra || []).filter(x => x.id !== row.dataset.x); delete S.checked[row.dataset.k]; save(); collapse(row) });
   document.querySelectorAll("[data-area]").forEach(b => b.onclick = e => { e.stopPropagation(); const row = b.closest(".sw"); closeSwipe(row); areaDlg(row.dataset.n) });
   document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { delete S.have[b.dataset.back]; save(); render() });
   if (!items.length) return;
-  $("#reset").onclick = () => { S.checked = {}; save(); document.querySelectorAll("[data-k].done").forEach(li => li.classList.remove("done")); updShop() };
+  $("#reset").onclick = () => { S.checked = {}; S.checkedQ = {}; save(); document.querySelectorAll("[data-k].done").forEach(li => { li.classList.remove("done"); li.setAttribute("aria-checked", "false") }); updShop() };
   /* nur noch nicht abgehakte Einträge weitergeben */
-  const text = () => groups.map(g => [g.title, g.list.filter(i => !S.checked[i.key])]).filter(([, l]) => l.length)
+  const text = () => groups.map(g => [g.title, g.list.filter(i => !isDone(i))]).filter(([, l]) => l.length)
     .map(([t, l]) => t + "\n" + l.map(i => `- ${i.qty ? nice(i.qty, i.unit, true)+" " : ""}${i.name}`).join("\n")).join("\n\n");
   const cp = $("#copy"); cp.onclick = () => navigator.clipboard.writeText(text()).then(() => cp.innerHTML = ic("check"));
   $("#share").onclick = () => { const t = "Einkaufsliste\n\n" + text();
@@ -643,6 +712,24 @@ function vShop(){
     else open("https://wa.me/?text=" + encodeURIComponent(t), "_blank") };
 }
 let justAdded = null;
+/* einen Eintrag ab- oder anhaken; die Menge merken, damit er wieder auftaucht, wenn mehr gebraucht wird */
+function toggleRow(li){
+  const k = li.dataset.k, on = !li.classList.contains("done");
+  S.checked[k] = on; (S.checkedQ ||= {})[k] = +li.dataset.q; if (!on) delete S.checkedQ[k];
+  save(); li.classList.toggle("done", on); li.setAttribute("aria-checked", on); updShop();
+}
+/* „Einkauf erledigt“: abgehakte eigene Artikel löschen, abgehakte Zutaten ausblenden */
+function shoppingDone(){
+  const rows = [...document.querySelectorAll("[data-k].done")]; if (!rows.length) return;
+  if (!confirm(`${rows.length} abgehakte Einträge von der Liste nehmen?`)) return;
+  S.bought ||= {};
+  for (const li of rows) {
+    const k = li.dataset.k;
+    if (li.dataset.x) S.extra = (S.extra || []).filter(x => x.id !== li.dataset.x); else S.bought[k] = +li.dataset.q;
+    delete S.checked[k]; if (S.checkedQ) delete S.checkedQ[k];
+  }
+  save(); render();
+}
 /* Bereich eines Eintrags ändern; gilt für alle Einträge mit diesem Namen */
 function areaDlg(name){
   const cur = aisleOf(name), n = name.toLowerCase().trim();
@@ -685,6 +772,8 @@ function updShop(){
   const p = $("#sprog"); if (p) { p.classList.toggle("full", all && done === all); p.firstChild.style.width = (all ? done / all * 100 : 0) + "%" }
   document.querySelectorAll("[data-g]").forEach(l => { const o = l.querySelectorAll("[data-k]:not(.done)").length; $(`[data-cnt="${l.dataset.g}"]`).textContent = o ? `${o} offen` : "✓ erledigt" });
   $("#c3").textContent = (all - done) || "";
+  const d = $("#done"); if (d) d.style.display = done ? "" : "none";
+  const h = $("#addh"); if (h && !$("#addi").value) h.textContent = "Auch Dinge, die in keinem Rezept stehen, z. B. Klopapier. Der Bereich wird automatisch erkannt.";
 }
 
 /* ---------- Dialoge ---------- */
@@ -758,7 +847,7 @@ function detail(id){
   $("#pk").onclick = () => { togglePlan(id); closeDlg(); render() };
   $("#ed").onclick = () => editor(r);
   $("#kc").onclick = () => nutriDlg(r);
-  $("#del").onclick = () => { if (confirm(`„${r.name}“ löschen?`)) { S.recipes = S.recipes.filter(x => x.id !== id); S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id); save(); closeDlg(); render() } };
+  $("#del").onclick = () => { if (confirm(`„${r.name}“ löschen?`)) { S.recipes = S.recipes.filter(x => x.id !== id); S.plan = S.plan.filter(x => x !== id); S.locked = S.locked.filter(x => x !== id); delete imgs[id]; idb("readwrite", st => st.delete(id)).catch(() => {}); save(); closeDlg(true); render() } };
 }
 /* ---------- Kategorien automatisch erkennen ----------
    Aus Name, Zutaten und Zubereitung; nutzt die Schreibweise vorhandener Kategorien. */
@@ -818,7 +907,7 @@ function editor(r){
   $("#et").oninput = () => { touched = true; upd() };
   ["#en", "#ei", "#es"].forEach(q => $(q).addEventListener("input", upd));
   upd();
-  let img = e.img || "";
+  let img = imgOf(e);
   $("#eimg").onchange = ev => { const f = ev.target.files[0]; if (!f) return;
     const im = new Image(), u = URL.createObjectURL(f);
     im.onload = () => { const c = document.createElement("canvas"), s = Math.min(1, 700 / im.width); c.width = im.width*s; c.height = im.height*s; c.getContext("2d").drawImage(im,0,0,c.width,c.height); img = c.toDataURL("image/jpeg",.75); URL.revokeObjectURL(u); $("#imgst").textContent = "ausgewählt ✓" }; im.src = u };
@@ -827,18 +916,27 @@ function editor(r){
     const rec = {id: e.id || uid(), name, portions: Math.max(1, +$("#ep").value || 1),
       tags: (t => t.length ? t : autoTags(name, $("#ei").value, $("#es").value))($("#et").value.split(",").map(s => s.trim()).filter(Boolean)),
       ingredients: $("#ei").value.split("\n").map(parseLine).filter(Boolean), steps: $("#es").value.trim(), img, edited: true, ...(e.own ? {own: e.own} : {})};
+    /* Foto in IndexedDB ablegen; klappt das nicht, bleibt es im normalen Speicher */
+    if (img) { imgs[rec.id] = img; rec.img = "idb"; idb("readwrite", st => st.put(img, rec.id)).catch(() => { rec.img = img; save() }) }
+    else if (e.img) idb("readwrite", st => st.delete(rec.id)).catch(() => {});
     const i = S.recipes.findIndex(x => x.id === rec.id); i >= 0 ? S.recipes[i] = rec : S.recipes.push(rec);
-    save(); closeDlg(); render();
+    save(); closeDlg(true); render();
   };
 }
 /* ---------- Blatt öffnen/schließen mit Animation, Wischen nach unten schließt ---------- */
 const dlg = $("#dlg"); let closeT = 0;
-function openDlg(){ clearTimeout(closeT); dlg.classList.remove("closing"); dlg.style.transform = ""; if (!dlg.open) dlg.showModal(); dlg.scrollTop = 0 }
-function closeDlg(){
-  if (!dlg.open || dlg.classList.contains("closing")) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return dlg.close();
+function openDlg(){ clearTimeout(closeT); dlg.classList.remove("closing"); dlg.style.transform = ""; dirty = false; if (!dlg.open) dlg.showModal(); dlg.scrollTop = 0 }
+/* hat man in einem Blatt etwas eingegeben, wird vor dem Schließen nachgefragt (force = nach dem Sichern) */
+let dirty = false;
+dlg.addEventListener("input", () => dirty = true);
+function closeDlg(force){
+  if (!dlg.open || dlg.classList.contains("closing")) return true;
+  if (dirty && force !== true && !confirm("Änderungen verwerfen?")) { dlg.style.transform = ""; return false }
+  dirty = false;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { dlg.close(); return true }
   dlg.classList.add("closing");
   closeT = setTimeout(() => { dlg.classList.remove("closing"); dlg.style.transform = ""; dlg.close() }, 280);
+  return true;
 }
 dlg.addEventListener("cancel", e => { e.preventDefault(); closeDlg() });
 dlg.addEventListener("click", e => { if (e.target === dlg) { const b = dlg.getBoundingClientRect(); if (e.clientY < b.top || e.clientY > b.bottom || e.clientX < b.left || e.clientX > b.right) closeDlg() } });
@@ -867,6 +965,10 @@ function vMe(){
       <div class="li"><span class="t">Personen</span>${stepper("people")}</div>
     </div>
     <p class="sf">Der Wochenplan plant so viele Gerichte. Alle Mengen werden auf die Personenzahl umgerechnet.</p>
+    <div class="sh"><span>Sichern</span></div>
+    <div class="list"><div class="li"><span class="t">Letzte Sicherung</span><span class="val ${backupDue() ? "warn" : ""}">${backupAge()}</span></div></div>
+    <p class="sf">Deine Daten liegen nur auf diesem Gerät. Sichere sie ab und zu mit „Backup speichern“ (z.&nbsp;B. in iCloud Drive) oder „Alles kopieren“.</p>
+    ${S.prevAt ? `<div class="list" style="margin-top:14px"><div class="li tap" id="prev"><span class="t act">Vorherigen Stand wiederherstellen<small>Stand vor dem Einfügen/Laden vom ${new Date(S.prevAt).toLocaleDateString("de-DE")}</small></span>${ic("reset", "chev")}</div></div>` : ""}
     <div class="sh"><span>Auf anderes Gerät übertragen</span></div>
     <div class="list">
       <div class="li tap" id="cpy"><span class="t act">Alles kopieren</span>${ic("copy", "chev")}</div>
@@ -879,22 +981,33 @@ function vMe(){
       <div class="li tap" id="bi"><span class="t act">Backup laden</span>${ic("chev", "chev")}</div>
     </div>
     ${installed ? "" : `<div class="sh"><span>Als App installieren</span></div>
-      <div class="list"><div class="li"><span class="t" style="font-size:15px;line-height:1.4">In Safari unten auf <b style="display:inline">Teilen</b> tippen, dann <b style="display:inline">„Zum Home-Bildschirm“</b>. Danach öffnest du das Kochbuch wie eine App, auch ohne Internet.</span></div></div>`}
+      <div class="list"><div class="li"><span class="t" style="font-size:0.882rem;line-height:1.4">In Safari unten auf <b style="display:inline">Teilen</b> tippen, dann <b style="display:inline">„Zum Home-Bildschirm“</b>. Danach öffnest du das Kochbuch wie eine App, auch ohne Internet.</span></div></div>`}
     <p class="sf" style="text-align:center;margin-top:24px">Mein Kochbuch · Version ${APP_VERSION} · funktioniert auch offline</p>`;
   $("#bx").onclick = exportData;
   $("#bi").onclick = importData;
   $("#cpy").onclick = copyData;
   $("#pst").onclick = pasteData;
+  if ($("#prev")) $("#prev").onclick = restorePrev;
+}
+/* Erinnerung ans Sichern: nie gesichert (und schon etwas eingetragen) oder länger als 30 Tage her */
+const backupAge = () => { if (!S.lastBackup) return "noch nie"; const d = Math.floor((Date.now() - S.lastBackup) / 864e5); return d < 1 ? "heute" : d === 1 ? "gestern" : `vor ${d} Tagen` };
+const backupDue = () => { const own = S.recipes.some(r => r.edited) || (S.extra || []).length; return own && (!S.lastBackup || Date.now() - S.lastBackup > 30 * 864e5) };
+async function restorePrev(){
+  let t = null; try { t = await idb("readonly", st => st.get("__vorher")) } catch {}
+  t ||= localStorage.getItem("kb2-vorher");
+  if (!t) return alert("Es gibt keinen gespeicherten vorherigen Stand.");
+  if (!confirm("Den Stand von vor dem letzten Einfügen/Laden wiederherstellen? Die aktuellen Daten werden ersetzt.")) return;
+  try { S = JSON.parse(t); delete S.prevAt; await moveImages(); save(); tab = "recipes"; render(); alert("Der vorherige Stand ist wiederhergestellt.") } catch { alert("Der vorherige Stand konnte nicht gelesen werden.") }
 }
 /* Übertragen per Zwischenablage (Mac -> iPhone über die gemeinsame Zwischenablage) */
 async function copyData(){
-  const text = JSON.stringify(S);
+  const text = JSON.stringify(fullData());
   /* älterer Weg zuerst (geht überall direkt beim Tippen), sonst die moderne Zwischenablage */
   const legacy = () => { const t = document.createElement("textarea"); t.value = text; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;opacity:0;top:0";
     document.body.append(t); t.select(); t.setSelectionRange(0, text.length); let ok = false; try { ok = document.execCommand("copy") } catch {} t.remove(); return ok };
   let ok = legacy();
   if (!ok) try { await navigator.clipboard.writeText(text); ok = true } catch {}
-  if (ok) { $("#cpy .t").textContent = "Kopiert ✓"; alert(`${S.recipes.length} Rezepte kopiert. Öffne jetzt das Kochbuch auf dem anderen Gerät: Profil → Einfügen.`) }
+  if (ok) { S.lastBackup = Date.now(); save(); $("#cpy .t").textContent = "Kopiert ✓"; alert(`${S.recipes.length} Rezepte kopiert. Öffne jetzt das Kochbuch auf dem anderen Gerät: Profil → Einfügen.`) }
   else textDlg("Kopieren", "Das automatische Kopieren hat nicht geklappt. Markiere den Text unten komplett und kopiere ihn (Cmd+A, Cmd+C).", text, true);
 }
 function pasteData(){
@@ -903,7 +1016,7 @@ function pasteData(){
 function textDlg(title, hint, text, ro){
   $("#dlg").innerHTML = `${sheetHd(ro ? "Fertig" : "Abbrechen", title, ro ? "" : "Übernehmen")}<div class="pad">
     <p class="sf" style="margin:4px 16px 8px">${hint}</p>
-    <div class="list"><div class="li"><textarea class="fi" id="tx" ${ro ? "readonly" : 'placeholder="Hier einfügen…"'} style="min-height:160px;font-size:13px">${esc(text)}</textarea></div></div>
+    <div class="list"><div class="li"><textarea class="fi" id="tx" ${ro ? "readonly" : 'placeholder="Hier einfügen…"'} style="min-height:160px;font-size:0.765rem">${esc(text)}</textarea></div></div>
     ${ro ? "" : `<button class="btn gray" id="rd" style="width:100%;margin-top:14px">Aus Zwischenablage einfügen</button>`}</div>`;
   openDlg();
   $("#hl").onclick = closeDlg;
@@ -911,23 +1024,26 @@ function textDlg(title, hint, text, ro){
   $("#rd").onclick = async () => { try { $("#tx").value = await navigator.clipboard.readText() } catch { alert("Bitte lange ins Feld drücken und „Einfügen“ wählen.") } };
   $("#hr").onclick = () => applyBackup($("#tx").value);
 }
-/* Backup-Text prüfen und übernehmen */
-function applyBackup(t){
+/* Backup-Text prüfen und übernehmen; vorher eine Sicherheitskopie des bisherigen Stands anlegen */
+async function applyBackup(t){
   let d; try { d = JSON.parse(String(t).trim()); if (!Array.isArray(d.recipes)) throw 0 } catch { return alert("Das sieht nicht nach Kochbuch-Daten aus. Hast du am anderen Gerät vorher „Kopieren“ gedrückt?") }
-  if (!confirm(`${d.recipes.length} Rezepte übernehmen? Die Daten auf diesem Gerät werden ersetzt.`)) return;
-  S = {...S, ...d}; save(); closeDlg(); tab = "recipes"; render();
+  if (!confirm(`${d.recipes.length} Rezepte übernehmen? Die Daten auf diesem Gerät werden ersetzt. Eine Sicherheitskopie des bisherigen Stands wird angelegt (Profil → Vorherigen Stand wiederherstellen).`)) return;
+  try { await idb("readwrite", st => st.put(JSON.stringify(fullData()), "__vorher")) } catch { try { localStorage.setItem("kb2-vorher", JSON.stringify(S)) } catch {} }
+  S.prevAt = Date.now();
+  const prevAt = S.prevAt; S = {...S, ...d, prevAt}; await moveImages(); save(); closeDlg(true); tab = "recipes"; render();
   alert(`Fertig: ${S.recipes.length} Rezepte sind jetzt auf diesem Gerät.`);
 }
 async function exportData(){
   const name = `kochbuch-backup-${new Date().toISOString().slice(0,10)}.json`;
-  const file = new File([JSON.stringify(S, null, 1)], name, {type: "application/json"});
+  const file = new File([JSON.stringify(fullData(), null, 1)], name, {type: "application/json"});
+  const done = () => { S.lastBackup = Date.now(); save(); if (tab === "me") render() };
   /* iPhone/Mac-Safari: Teilen-Menü (AirDrop, „In Dateien sichern“); sonst normaler Download */
   if (navigator.canShare?.({files: [file]})) {
-    try { await navigator.share({files: [file], title: "Kochbuch-Backup"}); return }
+    try { await navigator.share({files: [file], title: "Kochbuch-Backup"}); done(); return }
     catch (e) { if (e.name === "AbortError") return }
   }
   const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name;
-  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000); done();
 }
 function importData(){
   const i = document.createElement("input"); i.type = "file"; i.hidden = true; document.body.append(i);
@@ -945,7 +1061,7 @@ document.addEventListener("click", e => {
   if (k.startsWith("sv:")) {   /* Personen für ein einzelnes Gericht */
     const id = k.slice(3), v = Math.min(30, Math.max(1, servOf(id) + d));
     S.servings ||= {}; if (v === S.people) delete S.servings[id]; else S.servings[id] = v;
-    save(); if (dlg.open && $("#pk")) detail(id); render(); return;
+    save(); if (dlg.open && $("#pk")) { const st = dlg.scrollTop; detail(id); dlg.scrollTop = st } render(); return;
   }
   const max = k === "days" ? 14 : 30;
   S[k] = Math.min(max, Math.max(1, S[k] + d)); save(); render();
@@ -955,6 +1071,7 @@ document.addEventListener("click", e => { const a = e.target.closest("[data-gota
 const onScroll = () => document.body.classList.toggle("scrolled", scrollY > 40);
 addEventListener("scroll", onScroll, {passive: true});
 render();
+initImages();
 
 /* App-Funktionen: offline nutzbar, Daten möglichst dauerhaft behalten */
 /* Updates: beim Öffnen und beim Zurückkehren in die App nach einer neuen Version schauen;
