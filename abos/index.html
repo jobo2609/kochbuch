@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meine Abos</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon.png" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Abos">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<style>
+  :root {
+    --bg: #f2f2f7; --card: #ffffff; --fg: #1c1c1e; --muted: #6c6c70; --line: #e5e5ea;
+    --accent: #1f4a7a; --accent-fg: #ffffff; --soon: #8a6200; --soon-bg: #fff4d6;
+    --warn: #b3420a; --warn-bg: #ffe8dc; --danger: #c62828; --field: #f2f2f7;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000; --card: #1c1c1e; --fg: #f2f2f7; --muted: #98989f; --line: #2c2c2e;
+      --accent: #8cb8ea; --accent-fg: #0b1c2e; --soon: #f3d27a; --soon-bg: #33290c;
+      --warn: #ffab7a; --warn-bg: #3d2213; --danger: #ff6b6b; --field: #2c2c2e;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font: 17px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  main { max-width: 600px; margin: 0 auto; display: grid; gap: 16px; }
+  header { padding-top: 20px; }
+  h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .summe { color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  li button.abo {
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--card); border: 0; border-radius: 16px; padding: 14px 16px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 14px; align-items: center;
+  }
+  li button.abo:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .name { font-weight: 600; overflow-wrap: anywhere; }
+  .meta { color: var(--muted); font-size: 14px; }
+  .notiz { color: var(--muted); font-size: 13px; grid-column: 1 / -1; margin-top: 2px; }
+  .tage { grid-row: 1 / span 2; grid-column: 2; text-align: right; font-variant-numeric: tabular-nums; min-width: 56px; }
+  .tage b { display: block; font-size: 28px; line-height: 1; color: var(--accent); }
+  .tage span { font-size: 12px; color: var(--muted); }
+  .bald button.abo { background: var(--soon-bg); } .bald .tage b { color: var(--soon); }
+  .dringend button.abo { background: var(--warn-bg); } .dringend .tage b { color: var(--warn); }
+  .leer { color: var(--muted); text-align: center; padding: 32px 0; }
+  .kal { background: var(--card); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; }
+  .kal p { margin: 0; color: var(--muted); font-size: 14px; }
+  .btn {
+    font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 12px 16px; cursor: pointer;
+    background: var(--accent); color: var(--accent-fg); text-align: center; text-decoration: none; display: inline-block;
+  }
+  .btn.zweit { background: var(--field); color: var(--accent); }
+  .btn.loeschen { background: transparent; color: var(--danger); }
+  .plus {
+    position: fixed; right: max(20px, calc(env(safe-area-inset-right) + 20px)); bottom: calc(20px + env(safe-area-inset-bottom));
+    width: 58px; height: 58px; border-radius: 50%; font-size: 32px; line-height: 1; padding: 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  }
+  dialog {
+    border: 0; padding: 0; width: min(560px, 100%); max-width: 100%; margin: auto auto 0; border-radius: 20px 20px 0 0;
+    background: var(--card); color: var(--fg);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  dialog form { padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); display: grid; gap: 12px; }
+  dialog h2 { margin: 0 0 4px; font-size: 20px; }
+  label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  .knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .knoepfe .btn { flex: 1 1 140px; }
+  .fehler { margin: 0; color: var(--danger); font-size: 14px; }
+  textarea { font: 14px/1.3 ui-monospace, Menlo, monospace; resize: vertical; }
+  input, select, textarea {
+    font: inherit; font-size: 17px; color: var(--fg); background: var(--field); border: 0; border-radius: 10px;
+    padding: 11px 12px; width: 100%; min-width: 0;
+  }
+  .zeile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .aktionen { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; margin-top: 6px; }
+  .aktionen .rechts { display: flex; gap: 10px; margin-left: auto; }
+  @media (prefers-reduced-motion: no-preference) { li button.abo:active { transform: scale(.98); transition: transform .1s; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Meine Abos</h1>
+    <div class="summe" id="summe"></div>
+  </header>
+  <ul id="liste"></ul>
+  <section class="kal">
+    <p>Erinnerungen 7 Tage und 1 Tag vor jeder Verlängerung (9 Uhr) kommen über deinen Kalender. Nach Änderungen hier einfach erneut hinzufügen.</p>
+    <a class="btn zweit" id="kalender" href="#">Erinnerungen zum Kalender hinzufügen</a>
+  </section>
+  <section class="kal">
+    <p>Deine Abos liegen nur auf diesem Gerät. Mit einem Code kannst du sie übertragen oder sichern.</p>
+    <div class="knoepfe">
+      <button type="button" class="btn zweit" id="importOeffnen">Code einfügen</button>
+      <button type="button" class="btn zweit" id="sichernBtn">Sicherungs-Code kopieren</button>
+    </div>
+  </section>
+</main>
+<button class="btn plus" id="neu" aria-label="Abo hinzufügen">+</button>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h2 id="dlgTitel">Abo</h2>
+    <label>Name<input id="f-name" required autocomplete="off"></label>
+    <div class="zeile">
+      <label>Preis in €<input id="f-preis" inputmode="decimal" placeholder="0,00"></label>
+      <label>Rhythmus
+        <select id="f-intervall">
+          <option value="monatlich">monatlich</option>
+          <option value="vierteljährlich">vierteljährlich</option>
+          <option value="halbjährlich">halbjährlich</option>
+          <option value="jährlich">jährlich</option>
+          <option value="einmalig">läuft einmalig aus</option>
+        </select>
+      </label>
+    </div>
+    <label>Nächste Verlängerung<input id="f-datum" type="date"></label>
+    <label>Kostenlos bis (optional)<input id="f-gratis" type="date"></label>
+    <label>Notiz (optional)<input id="f-notiz" autocomplete="off"></label>
+    <div class="aktionen">
+      <button type="button" class="btn loeschen" id="loeschen">Löschen</button>
+      <div class="rechts">
+        <button type="button" class="btn zweit" id="abbrechen">Abbrechen</button>
+        <button type="submit" class="btn" id="speichern">Speichern</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="idlg">
+  <form id="iform" method="dialog">
+    <h2>Abos per Code übernehmen</h2>
+    <label>Code<textarea id="f-code" rows="5" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></label>
+    <p id="importFehler" class="fehler" hidden>Der Code ließ sich nicht lesen. Bitte komplett kopieren und erneut einfügen.</p>
+    <div class="aktionen">
+      <div class="rechts">
+        <button type="button" class="btn zweit" id="importAbbrechen">Abbrechen</button>
+        <button type="submit" class="btn">Übernehmen</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const APP_VERSION = "abos-v1";
+const SPEICHER = "abos-daten";
+/* Keine persönlichen Daten im Code: die Abos kommen per Import-Code oder werden in der App angelegt
+   und bleiben nur auf diesem Gerät. */
+const STANDARD = [];
+
+/* ---------- Daten ---------- */
+function laden() {
+  try { const s = localStorage.getItem(SPEICHER); if (s) return JSON.parse(s); } catch {}
+  return STANDARD.map(a => ({ ...a }));
+}
+function sichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(abos)); } catch {} }
+let abos = laden();
+
+/* ---------- Datumslogik ---------- */
+const SCHRITT = { "monatlich": 1, "vierteljährlich": 3, "halbjährlich": 6, "jährlich": 12 };
+const SUFFIX = { "monatlich": "/Monat", "vierteljährlich": "/Quartal", "halbjährlich": "/Halbjahr", "jährlich": "/Jahr" };
+const PRO_MONAT = { "monatlich": 1, "vierteljährlich": 1/3, "halbjährlich": 1/6, "jährlich": 1/12 };
+function heute() { const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
+const alsDatum = s => new Date(s + "T00:00:00Z");
+function plusMonate(start, n) {
+  const tag = start.getUTCDate(), y = start.getUTCFullYear(), m = start.getUTCMonth() + n;
+  const letzter = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m, Math.min(tag, letzter)));
+}
+function naechste(a, h = heute()) {
+  if (!a.datum) return null;
+  const start = alsDatum(a.datum), schritt = SCHRITT[a.intervall];
+  if (!schritt) return start;
+  let d = start, i = 0;
+  while (d < h && i < 2000) d = plusMonate(start, schritt * ++i);
+  return d;
+}
+function tage(a, h = heute()) { const d = naechste(a, h); return d ? Math.round((d - h) / 864e5) : null; }
+const gratis = (a, h = heute()) => a.gratisBis && h < alsDatum(a.gratisBis);
+const eur = n => n.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+const datumText = d => d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+function preisText(a) {
+  if (!a.preis) return "kostenlos";
+  const p = eur(a.preis) + (SUFFIX[a.intervall] || "");
+  return gratis(a) ? "gratis, danach " + p : p;
+}
+const monatsKosten = () => abos.reduce((s, a) => s + (gratis(a) ? 0 : (a.preis || 0) * (PRO_MONAT[a.intervall] ?? 0)), 0);
+
+/* ---------- Anzeige ---------- */
+const liste = document.getElementById("liste");
+function zeigen() {
+  document.getElementById("summe").textContent =
+    `${abos.length} ${abos.length === 1 ? "Abo" : "Abos"} · aktuell etwa ${eur(monatsKosten())} im Monat`;
+  liste.replaceChildren();
+  if (!abos.length) {
+    const p = document.createElement("li"); p.className = "leer";
+    p.textContent = "Noch keine Abos. Füge deinen Code unten ein oder tippe auf +.";
+    liste.append(p); return;
+  }
+  abos.map((a, i) => ({ a, i, t: tage(a), d: naechste(a) }))
+    .sort((x, y) => (x.t ?? 1e9) - (y.t ?? 1e9))
+    .forEach(({ a, i, t, d }) => {
+      const li = document.createElement("li");
+      if (t !== null && t <= 1) li.className = "dringend"; else if (t !== null && t <= 7) li.className = "bald";
+      const b = document.createElement("button"); b.className = "abo"; b.type = "button";
+      b.addEventListener("click", () => oeffnen(i));
+      const name = document.createElement("div"); name.className = "name"; name.textContent = a.name;
+      const tg = document.createElement("div"); tg.className = "tage";
+      const zahl = document.createElement("b"); zahl.textContent = t === null ? "–" : t === 0 ? "heute" : t;
+      const lbl = document.createElement("span"); lbl.textContent = t === null ? "Datum fehlt" : t === 0 ? "" : t === 1 ? "Tag" : "Tage";
+      tg.append(zahl, lbl);
+      const meta = document.createElement("div"); meta.className = "meta";
+      const art = a.intervall === "einmalig" ? "läuft aus am " : gratis(a) && a.gratisBis === a.datum ? "Probezeit endet " : "verlängert am ";
+      meta.textContent = preisText(a) + " · " + (d ? art + datumText(d) : "Datum unbekannt");
+      b.append(name, tg, meta);
+      if (a.notiz) { const n = document.createElement("div"); n.className = "notiz"; n.textContent = a.notiz; b.append(n); }
+      li.append(b); liste.append(li);
+    });
+}
+
+/* ---------- Bearbeiten ---------- */
+const dlg = document.getElementById("dlg"), f = id => document.getElementById(id);
+let aktuell = -1;
+function oeffnen(i) {
+  aktuell = i;
+  const a = i >= 0 ? abos[i] : { name: "", preis: "", intervall: "monatlich", datum: "", gratisBis: "", notiz: "" };
+  f("dlgTitel").textContent = i >= 0 ? "Abo bearbeiten" : "Neues Abo";
+  f("f-name").value = a.name;
+  f("f-preis").value = a.preis ? a.preis.toFixed(2).replace(".", ",") : "";
+  f("f-intervall").value = a.intervall || "monatlich";
+  f("f-datum").value = a.datum || "";
+  f("f-gratis").value = a.gratisBis || "";
+  f("f-notiz").value = a.notiz || "";
+  f("loeschen").hidden = i < 0;
+  dlg.showModal();
+}
+document.getElementById("neu").addEventListener("click", () => oeffnen(-1));
+f("abbrechen").addEventListener("click", () => dlg.close());
+f("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = f("f-name").value.trim(); if (!name) return;
+  const preis = parseFloat(f("f-preis").value.replace(/\./g, "").replace(",", ".")) || 0;
+  const abo = { name, preis, intervall: f("f-intervall").value, datum: f("f-datum").value };
+  if (f("f-gratis").value) abo.gratisBis = f("f-gratis").value;
+  if (f("f-notiz").value.trim()) abo.notiz = f("f-notiz").value.trim();
+  if (aktuell >= 0) abos[aktuell] = abo; else abos.push(abo);
+  sichern(); zeigen(); dlg.close();
+});
+let loeschBereit = false;
+f("loeschen").addEventListener("click", () => {
+  if (!loeschBereit) { loeschBereit = true; f("loeschen").textContent = "Wirklich löschen?"; return; }
+  abos.splice(aktuell, 1); sichern(); zeigen(); dlg.close();
+});
+dlg.addEventListener("close", () => { loeschBereit = false; f("loeschen").textContent = "Löschen"; });
+
+/* ---------- Import / Sicherung ---------- */
+const kodieren = obj => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(obj))));
+const dekodieren = code => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(code.trim()), c => c.charCodeAt(0))));
+function importieren(code) {
+  try {
+    const daten = dekodieren(code.replace(/^.*#import=/, ""));
+    const liste = Array.isArray(daten) ? daten : daten.abos;
+    if (!Array.isArray(liste) || !liste.every(a => a && typeof a.name === "string")) throw new Error();
+    abos = liste; sichern(); zeigen(); return true;
+  } catch { return false; }
+}
+if (location.hash.startsWith("#import=")) {
+  importieren(location.hash.slice(8));
+  history.replaceState(null, "", location.pathname);
+}
+const idlg = document.getElementById("idlg");
+document.getElementById("importOeffnen").addEventListener("click", () => {
+  f("f-code").value = ""; f("importFehler").hidden = true; idlg.showModal();
+});
+f("importAbbrechen").addEventListener("click", () => idlg.close());
+f("iform").addEventListener("submit", e => {
+  e.preventDefault();
+  if (importieren(f("f-code").value)) idlg.close(); else f("importFehler").hidden = false;
+});
+f("sichernBtn").addEventListener("click", async () => {
+  const code = kodieren(abos);
+  try { await navigator.clipboard.writeText(code); f("sichernBtn").textContent = "Code kopiert"; }
+  catch { f("f-code").value = code; f("importFehler").hidden = true; idlg.showModal(); f("f-code").select(); }
+  setTimeout(() => f("sichernBtn").textContent = "Sicherungs-Code kopieren", 2500);
+});
+
+/* ---------- Kalender (.ics mit Erinnerungen) ---------- */
+const RRULE = { "monatlich": "FREQ=MONTHLY", "vierteljährlich": "FREQ=MONTHLY;INTERVAL=3", "halbjährlich": "FREQ=MONTHLY;INTERVAL=6", "jährlich": "FREQ=YEARLY" };
+const esc = s => s.replace(/\\/g, "\\\\").replace(/[,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+function kalender() {
+  const h = heute(), stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+  const z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Meine Abos//DE", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Abos"];
+  for (const a of abos) {
+    const d = naechste(a, h); if (!d) continue;
+    const e = new Date(d); e.setUTCDate(e.getUTCDate() + 1);
+    const ymd = x => x.toISOString().slice(0, 10).replace(/-/g, "");
+    const titel = a.intervall === "einmalig" ? `${a.name} läuft aus` : a.gratisBis && a.gratisBis === a.datum ? `${a.name}: Probezeit endet` : `${a.name} verlängert sich`;
+    const uid = a.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "@meine-abos";
+    z.push("BEGIN:VEVENT", `UID:${uid}`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${ymd(d)}`, `DTEND;VALUE=DATE:${ymd(e)}`,
+      `SUMMARY:${esc(titel)}`, `DESCRIPTION:${esc(preisText(a) + (a.notiz ? "\n" + a.notiz : ""))}`, "TRANSP:TRANSPARENT");
+    if (RRULE[a.intervall] && !(a.gratisBis && a.gratisBis === a.datum)) z.push(`RRULE:${RRULE[a.intervall]}`);
+    for (const [trig, wann] of [["-P6DT15H", "In einer Woche"], ["-PT15H", "Morgen"]])
+      z.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc(wann + ": " + titel)}`, `TRIGGER;RELATED=START:${trig}`, "END:VALARM");
+    z.push("END:VEVENT");
+  }
+  z.push("END:VCALENDAR");
+  return z.join("\r\n") + "\r\n";
+}
+f("kalender").addEventListener("click", e => {
+  e.preventDefault();
+  const url = URL.createObjectURL(new Blob([kalender()], { type: "text/calendar;charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = "abos.ics"; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
+
+zeigen();
+/* Tageszahlen nach Mitternacht oder beim Zurückkehren in die App auffrischen */
+document.addEventListener("visibilitychange", () => { if (!document.hidden) zeigen(); });
+
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
+}
+</script>
+</body>
+</html>
